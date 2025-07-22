@@ -1,6 +1,6 @@
 import os
 from flask import Flask, request, jsonify
-from subdomain_enum import enumerate_subdomains
+from core.recon.subdomain_enum import enumerate_subdomains
 
 app = Flask(__name__)
 
