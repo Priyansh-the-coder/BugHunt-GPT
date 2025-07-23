@@ -38,8 +38,8 @@ RUN git clone https://github.com/s0md3v/Arjun.git /opt/Arjun && \
 RUN git clone https://github.com/devanshbatham/ParamSpider.git /opt/ParamSpider && \
     cd /opt/ParamSpider && \
     pip install -r requirements.txt && \
-    ln -s /opt/ParamSpider/paramspider.py /usr/bin/paramspider && \
-    chmod +x /opt/ParamSpider/paramspider.py
+    ln -s /opt/ParamSpider/main.py /usr/bin/paramspider && \
+    chmod +x /opt/ParamSpider/main.py
 
 # Install Findomain (9.0.3)
 RUN wget https://github.com/findomain/findomain/releases/download/9.0.3/findomain-linux.zip -O /tmp/findomain.zip && \
