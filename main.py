@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "Subdomain Enumeration API is live!"
+    return "BugHUnt-GPT API is live!"
 
 @app.route("/subdomains")
 def get_subdomains():
@@ -17,6 +17,21 @@ def get_subdomains():
     try:
         results = enumerate_subdomains(domain)
         return jsonify({"live_subdomains": results})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/takeover")
+def run_takeover():
+    try:
+        data = request.get_json()
+        subdomains = data.get("subdomains")
+
+        if not subdomains or not isinstance(subdomains, list):
+            return jsonify({"error": "Provide a list of subdomains in JSON format"}), 400
+
+        takeover_results = check_takeover(subdomains)
+        return jsonify({"takeover_results": takeover_results})
+    
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
