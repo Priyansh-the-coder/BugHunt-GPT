@@ -1,6 +1,8 @@
 import os
 from flask import Flask, request, jsonify
 from core.recon.subdomain_enum import enumerate_subdomains
+from core.recon.url_collector import collect_urls
+from core.recon.param_discovery import discover_all_parameters
 
 app = Flask(__name__)
 
@@ -32,6 +34,35 @@ def run_takeover():
         takeover_results = check_takeover(subdomains)
         return jsonify({"takeover_results": takeover_results})
     
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+@app.route("/collect_urls")
+def collect_urls_endpoint():
+    domain = request.args.get("domain")
+    if not domain:
+        return jsonify({"error": "No domain provided"}), 400
+
+    try:
+        urls = collect_urls(domain)
+        return jsonify({"collected_urls": urls})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/param_discovery')
+def param_discovery():
+    domain = request.args.get('domain')
+    if not domain:
+        return jsonify({"error": "Domain parameter is required"}), 400
+
+    try:
+        param_names, param_map = discover_all_parameters(domain)
+
+        return jsonify({
+            "domain": domain,
+            "total_params_found": len(param_names),
+            "parameters": list(param_names),
+            "param_to_urls": param_map
+        })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
