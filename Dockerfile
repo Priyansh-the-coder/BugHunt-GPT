@@ -42,6 +42,31 @@ RUN git clone https://github.com/m4ll0k/Bug-Bounty-Toolz && \
     apt install -y python3-dnspython && \
     rm -rf Bug-Bounty-Toolz
 
+# Clone ParamSpider
+RUN git clone https://github.com/devanshbatham/ParamSpider.git /ParamSpider
+
+# Set PYTHONPATH and working directory for ParamSpider
+ENV PYTHONPATH=/ParamSpider
+ENV PARAMSPIDER_PATH=/ParamSpider
+
+# Install Gau (Go tool)
+RUN wget https://github.com/lc/gau/releases/download/v2.2.1/gau_2.2.1_linux_amd64.tar.gz && \
+    tar -xzf gau_2.2.1_linux_amd64.tar.gz && \
+    mv gau /usr/local/bin/ && \
+    rm -rf gau_2.2.1_linux_amd64.tar.gz LICENSE README.md
+
+# Install Waybackurls (Go tool)
+RUN go install github.com/tomnomnom/waybackurls@latest && \
+    cp /root/go/bin/waybackurls /usr/local/bin/
+
+# Install Arjun (Python tool)
+RUN git clone https://github.com/s0md3v/Arjun.git /Arjun && \
+    cd /Arjun && \
+    pip install -r requirements.txt
+
+# Copy Go binaries to /usr/local/bin
+RUN cp /root/go/bin/* /usr/local/bin/
+
 # --- Copy project files ---
 WORKDIR /app
 COPY . /app
