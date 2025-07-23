@@ -20,10 +20,8 @@ ENV PATH="/usr/local/go/bin:/root/go/bin:$PATH"
 # --- Install subdomain tools ---
 RUN go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest && \
     go install github.com/projectdiscovery/httpx/cmd/httpx@latest && \
-    go install github.com/projectdiscovery/naabu/v2/cmd/naabu@latest
-
-# --- Install assetfinder ---
-RUN go install github.com/tomnomnom/assetfinder@latest
+    go install github.com/projectdiscovery/naabu/v2/cmd/naabu@latest && \
+    go install github.com/tomnomnom/assetfinder@latest
 
 # --- Install cero ---
 RUN git clone https://github.com/glebarez/cero && \
@@ -32,6 +30,17 @@ RUN git clone https://github.com/glebarez/cero && \
 # --- Install shosubgo ---
 RUN git clone https://github.com/incogbyte/shosubgo && \
     cd shosubgo && go build -o shosubgo . && mv shosubgo /usr/local/bin && cd .. && rm -rf shosubgo
+
+# --- Install Subjack ---
+RUN go install github.com/haccer/subjack@latest
+
+# --- Install BadDNS ---
+RUN git clone https://github.com/m4ll0k/Bug-Bounty-Toolz && \
+    cp -r Bug-Bounty-Toolz/Subdomain\ Takeover/BadDNS /opt/baddns && \
+    chmod +x /opt/baddns/baddns.py && \
+    ln -s /opt/baddns/baddns.py /usr/local/bin/baddns && \
+    apt install -y python3-dnspython && \
+    rm -rf Bug-Bounty-Toolz
 
 # --- Copy project files ---
 WORKDIR /app
