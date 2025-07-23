@@ -37,7 +37,8 @@ def run_paramspider(domain):
         ], check=True, cwd=paramspider_dir, env={**os.environ, "PYTHONPATH": paramspider_dir})
     except subprocess.CalledProcessError as e:
         print(f"[!] ParamSpider error: {e}")
-
+    print(f"[DEBUG] Absolute path to output: {os.path.abspath(paramspider_file)}")
+    
     return output_file if os.path.exists(output_file) else None
 
 
