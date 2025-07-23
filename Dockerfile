@@ -19,9 +19,9 @@ ENV PATH="/usr/local/go/bin:/root/go/bin:$PATH"
 
 # --- Install subdomain tools ---
 RUN go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest && \
-    go install github.com/projectdiscovery/httpx/cmd/httpx@latest && \
-    go install github.com/projectdiscovery/naabu/v2/cmd/naabu@latest && \
-    go install github.com/tomnomnom/assetfinder@latest
+RUN go install github.com/projectdiscovery/httpx/cmd/httpx@latest && \
+RUN go install github.com/projectdiscovery/naabu/v2/cmd/naabu@latest && \
+RUN go install github.com/tomnomnom/assetfinder@latest
 
 # --- Install cero ---
 RUN git clone https://github.com/glebarez/cero && \
