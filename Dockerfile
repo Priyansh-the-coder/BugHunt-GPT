@@ -29,10 +29,8 @@ RUN go install github.com/lc/gau/v2/cmd/gau@latest && \
     ln -s /root/go/bin/gau /usr/bin/gau && \
     ln -s /root/go/bin/waybackurls /usr/bin/waybackurls
 
-# Install Arjun (Python tool)
+# Install Arjun (no requirements.txt needed)
 RUN git clone https://github.com/s0md3v/Arjun.git /opt/Arjun && \
-    cd /opt/Arjun && \
-    pip install -r requirements.txt && \
     ln -s /opt/Arjun/arjun.py /usr/bin/arjun && \
     chmod +x /opt/Arjun/arjun.py
 
