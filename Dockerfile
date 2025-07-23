@@ -23,6 +23,26 @@ RUN go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest && 
     ln -s /root/go/bin/assetfinder /usr/bin/assetfinder && \
     ln -s /root/go/bin/amass /usr/bin/amass
 
+# Install gau and waybackurls using go
+RUN go install github.com/lc/gau/v2/cmd/gau@latest && \
+    go install github.com/tomnomnom/waybackurls@latest && \
+    ln -s /root/go/bin/gau /usr/bin/gau && \
+    ln -s /root/go/bin/waybackurls /usr/bin/waybackurls
+
+# Install Arjun (Python tool)
+RUN git clone https://github.com/s0md3v/Arjun.git /opt/Arjun && \
+    cd /opt/Arjun && \
+    pip install -r requirements.txt && \
+    ln -s /opt/Arjun/arjun.py /usr/bin/arjun && \
+    chmod +x /opt/Arjun/arjun.py
+
+# Install ParamSpider (Python tool)
+RUN git clone https://github.com/devanshbatham/ParamSpider.git /opt/ParamSpider && \
+    cd /opt/ParamSpider && \
+    pip install -r requirements.txt && \
+    ln -s /opt/ParamSpider/paramspider.py /usr/bin/paramspider && \
+    chmod +x /opt/ParamSpider/paramspider.py
+
 # Install Findomain (9.0.3)
 RUN wget https://github.com/findomain/findomain/releases/download/9.0.3/findomain-linux.zip -O /tmp/findomain.zip && \
     unzip /tmp/findomain.zip -d /tmp/ && \
