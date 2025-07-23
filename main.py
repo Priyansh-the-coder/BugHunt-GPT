@@ -66,6 +66,17 @@ def param_discovery():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/sub_json_to_list', methods=['POST'])
+def json_to_list():
+    try:
+        data = request.get_json()
+        subdomains = data.get("subdomains", [])
+        if not isinstance(subdomains, list):
+            return jsonify({"error": "subdomains must be a list"}), 400
+        return jsonify({"result": subdomains})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     app.run(host="0.0.0.0", port=port)
