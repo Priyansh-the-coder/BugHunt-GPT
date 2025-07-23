@@ -15,14 +15,26 @@ RUN curl -OL https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
     ln -s /usr/local/go/bin/go /usr/bin/go && \
     rm go${GO_VERSION}.linux-amd64.tar.gz
 
-# Install Subdomain Enumeration Tools
+# --- Install Go-based tools ---
 RUN go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest && \
     go install github.com/tomnomnom/assetfinder@latest && \
     go install github.com/owasp-amass/amass/v4/...@latest && \
+    go install github.com/projectdiscovery/httpx/cmd/httpx@latest && \
     ln -s /root/go/bin/subfinder /usr/bin/subfinder && \
     ln -s /root/go/bin/assetfinder /usr/bin/assetfinder && \
-    ln -s /root/go/bin/amass /usr/bin/amass
+    ln -s /root/go/bin/amass /usr/bin/amass && \
+    ln -s /root/go/bin/httpx /usr/bin/httpx
 
+# --- Install cero ---
+RUN git clone https://github.com/glebarez/cero.git /opt/cero && \
+    cd /opt/cero && go build && \
+    mv cero /usr/bin/ && chmod +x /usr/bin/cero
+
+# --- Install shosubgo ---
+RUN git clone https://github.com/incogbyte/shosubgo.git /opt/shosubgo && \
+    cd /opt/shosubgo && go build -o shosubgo main.go && \
+    mv shosubgo /usr/bin/shosubgo && chmod +x /usr/bin/shosubgo
+    
 # Install gau and waybackurls using go
 RUN go install github.com/lc/gau/v2/cmd/gau@latest && \
     go install github.com/tomnomnom/waybackurls@latest && \
