@@ -33,8 +33,7 @@ def run_paramspider(domain):
     try:
         subprocess.run([
             "python3", "-m", "paramspider.main",
-            "-d", domain,
-            "--no-wayback"
+            "-d", domain
         ], check=True, cwd=paramspider_dir, env={**os.environ, "PYTHONPATH": paramspider_dir})
     except subprocess.CalledProcessError as e:
         print(f"[!] ParamSpider error: {e}")
