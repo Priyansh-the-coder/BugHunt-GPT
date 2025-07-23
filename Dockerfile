@@ -23,9 +23,13 @@ RUN go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest && 
     ln -s /root/go/bin/assetfinder /usr/bin/assetfinder && \
     ln -s /root/go/bin/amass /usr/bin/amass
 
-# Install findomain binary
-RUN wget https://github.com/findomain/findomain/releases/download/9.0.4/findomain-linux-amd64 -O /usr/bin/findomain && \
-    chmod +x /usr/bin/findomain
+# Install Findomain (9.0.3)
+RUN wget https://github.com/findomain/findomain/releases/download/9.0.3/findomain-linux.zip -O /tmp/findomain.zip && \
+    unzip /tmp/findomain.zip -d /tmp/ && \
+    mv /tmp/findomain /usr/bin/findomain && \
+    chmod +x /usr/bin/findomain && \
+    rm /tmp/findomain.zip
+
 
 # Copy Python requirements
 COPY requirements.txt /app/requirements.txt
