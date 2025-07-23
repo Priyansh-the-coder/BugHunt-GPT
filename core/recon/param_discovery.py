@@ -23,7 +23,7 @@ def extract_parameters(urls):
 def run_paramspider(domain):
     print(f"[+] Running ParamSpider on: {domain}")
     
-    paramspider_dir = os.environ.get("PARAMSPIDER_PATH", "/ParamSpider")
+    paramspider_dir = os.environ.get("PARAMSPIDER_PATH", "/opt/ParamSpider")
     results_dir = "results"
     output_file = os.path.join(results_dir, f"{domain}.txt")
 
