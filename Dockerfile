@@ -18,10 +18,18 @@ RUN curl -OL https://go.dev/dl/go1.20.7.linux-amd64.tar.gz && \
 ENV PATH="/usr/local/go/bin:/root/go/bin:$PATH"
 
 # --- Install subdomain tools ---
-RUN go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest && \
-RUN go install github.com/projectdiscovery/httpx/cmd/httpx@latest && \
-RUN go install github.com/projectdiscovery/naabu/v2/cmd/naabu@latest && \
+# --- Install subfinder ---
+RUN go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
+
+# --- Install httpx ---
+RUN go install github.com/projectdiscovery/httpx/cmd/httpx@latest
+
+# --- Install naabu ---
+RUN go install github.com/projectdiscovery/naabu/v2/cmd/naabu@latest
+
+# --- Install assetfinder ---
 RUN go install github.com/tomnomnom/assetfinder@latest
+
 
 # --- Install cero ---
 RUN git clone https://github.com/glebarez/cero && \
