@@ -31,8 +31,8 @@ RUN go install github.com/lc/gau/v2/cmd/gau@latest && \
 
 # Install Arjun (no requirements.txt needed)
 RUN git clone https://github.com/s0md3v/Arjun.git /opt/Arjun && \
-    ln -s /opt/Arjun/arjun.py /usr/bin/arjun && \
-    chmod +x /opt/Arjun/arjun.py
+    ln -s /opt/Arjun/arjun /usr/bin/arjun && \
+    chmod +x /opt/Arjun/arjun/__main__.py
 
 # Install ParamSpider (Python tool)
 RUN git clone https://github.com/devanshbatham/ParamSpider.git /opt/ParamSpider && \
