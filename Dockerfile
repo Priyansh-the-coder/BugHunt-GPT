@@ -9,11 +9,11 @@ RUN apt update && apt install -y \
     curl wget unzip git python3 python3-pip build-essential \
     libpcap-dev dnsutils
 
-# --- Install Go ---
-RUN curl -LO https://golang.org/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
-    tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz && \
-    echo "export PATH=$PATH:/usr/local/go/bin" >> /etc/profile && \
-    rm go${GO_VERSION}.linux-amd64.tar.gz
+# Install latest Go
+RUN curl -OL https://go.dev/dl/go1.20.7.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go1.20.7.linux-amd64.tar.gz && \
+    ln -s /usr/local/go/bin/go /usr/bin/go && \
+    go version
 
 ENV PATH="/usr/local/go/bin:/root/go/bin:$PATH"
 
