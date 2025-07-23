@@ -24,7 +24,7 @@ RUN go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest && 
     ln -s /root/go/bin/amass /usr/bin/amass
 
 # Install findomain binary
-RUN wget https://github.com/findomain/findomain/releases/latest/download/findomain-linux -O /usr/bin/findomain && \
+RUN wget https://github.com/findomain/findomain/releases/download/9.0.4/findomain-linux-amd64 -O /usr/bin/findomain && \
     chmod +x /usr/bin/findomain
 
 # Copy Python requirements
