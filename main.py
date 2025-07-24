@@ -22,7 +22,7 @@ def get_subdomains():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/takeover")
+@app.route("/takeover",methods=['POST'])
 def run_takeover():
     try:
         data = request.get_json()
