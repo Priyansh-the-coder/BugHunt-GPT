@@ -13,7 +13,7 @@ def check_takeover(subdomains):
         subprocess.run([
             "subjack", "-w", "live_subs.txt",
             "-t", "100", "-timeout", "30", "-ssl",
-            "-c", "/path/to/fingerprints.json",  # ⚠️ Update this path
+            "-c", "/usr/share/subjack/fingerprints.json",  
             "-o", "subjack_results.txt", "-v"
         ])
     except Exception as e:
