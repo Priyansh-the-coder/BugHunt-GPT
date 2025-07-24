@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify
 from core.recon.subdomain_enum import enumerate_subdomains
 from core.recon.url_collector import collect_urls
 from core.recon.param_discovery import discover_all_parameters
+from ast import literal_eval
 
 app = Flask(__name__)
 
@@ -22,20 +23,24 @@ def get_subdomains():
     except Exception as e:
         return str(e), 500
 
-@app.route("/takeover",methods=['POST'])
+@app.route("/takeover", methods=['POST'])
 def run_takeover():
     try:
-        data = request.get_json()
-        subdomains = data.get("subdomains")
+        # Read raw data from request body
+        raw_data = request.data.decode('utf-8')
+        subdomains = literal_eval(raw_data)  # Safely convert string to Python list
 
-        if not subdomains or not isinstance(subdomains, list):
-            return jsonify({"error": "Provide a list of subdomains in JSON format"}), 400
+        # Validate it's a list of strings
+        if not isinstance(subdomains, list) or not all(isinstance(i, str) for i in subdomains):
+            return "Input must be a Python-style list of strings", 400
 
         takeover_results = check_takeover(subdomains)
-        return jsonify({"takeover_results": takeover_results})
-    
+        return str(takeover_results), 200  # Return Python-style list as string
+
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return str(e), 500
+
+
 @app.route("/collect_urls")
 def collect_urls_endpoint():
     domain = request.args.get("domain")
