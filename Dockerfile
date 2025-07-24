@@ -24,7 +24,7 @@ RUN go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest && 
     ln -s /root/go/bin/subfinder /usr/bin/subfinder && \
     ln -s /root/go/bin/assetfinder /usr/bin/assetfinder && \
     ln -s /root/go/bin/amass /usr/bin/amass && \
-    ln -s /root/go/bin/httpx /usr/bin/httpx
+    ln -s /root/go/bin/httpx /usr/bin/httpx && \
     ln -s /root/go/bin/subjack /usr/bin/subjack
 
 # --- Install cero ---
