@@ -34,11 +34,12 @@ RUN go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest && 
     go install github.com/owasp-amass/amass/v4/...@latest && \
     go install github.com/projectdiscovery/httpx/cmd/httpx@latest && \
     go install github.com/haccer/subjack@latest && \
-    ln -s /root/go/bin/subfinder /usr/bin/subfinder && \
-    ln -s /root/go/bin/assetfinder /usr/bin/assetfinder && \
-    ln -s /root/go/bin/amass /usr/bin/amass && \
-    ln -s /root/go/bin/httpx /usr/bin/httpx && \
-    ln -s /root/go/bin/subjack /usr/bin/subjack
+    ln -sf /root/go/bin/subfinder /usr/bin/subfinder && \
+    ln -sf /root/go/bin/assetfinder /usr/bin/assetfinder && \
+    ln -sf /root/go/bin/amass /usr/bin/amass && \
+    ln -sf /root/go/bin/httpx /usr/bin/httpx && \
+    ln -sf /root/go/bin/subjack /usr/bin/subjack
+
 
 # --- Install cero ---
 RUN git clone https://github.com/glebarez/cero.git /opt/cero && \
