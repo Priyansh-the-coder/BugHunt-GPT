@@ -20,18 +20,22 @@ def check_takeover(subdomains):
         print(f"[!] subjack failed: {e}")
 
     print("[+] Running BadDNS...")
+    
+    # Run dnsx (used by BadDNS)
     try:
-        subprocess.run([
-            "baddns", "-i", "live_subs.txt", "-o", "baddns_results.txt", "-t", "100"
-        ])
+        result = subprocess.run(
+            ["dnsx", "-l", "subs.txt", "-o", "dnsx_output.txt"],
+            capture_output=True, text=True
+        )
     except Exception as e:
         print(f"[!] BadDNS failed: {e}")
-
+    
     results = {
         "subjack": set(),
         "baddns": set()
     }
-
+    
+    # Read Subjack Results
     try:
         with open("subjack_results.txt", "r") as f:
             for line in f:
@@ -39,18 +43,20 @@ def check_takeover(subdomains):
                     results["subjack"].add(line.strip())
     except FileNotFoundError:
         print("[!] subjack_results.txt not found.")
-
+    
+    # Read BadDNS (dnsx) Results
     try:
-        with open("baddns_results.txt", "r") as f:
+        with open("dnsx_output.txt", "r") as f:  # ✅ Correct filename!
             for line in f:
                 if "Possible Takeover" in line or "Vulnerable" in line:
                     results["baddns"].add(line.strip())
     except FileNotFoundError:
-        print("[!] baddns_results.txt not found.")
-
+        print("[!] dnsx_output.txt not found.")  # ✅ Corrected filename
+    
+    # ✅ Corrected keys and filenames in print and return statements
     print(f"[✓] {len(results['subjack'])} unique potential takeovers found by subjack.")
     print(f"[✓] {len(results['baddns'])} unique potential takeovers found by BadDNS.")
-
+    
     return {
         "subjack": sorted(results["subjack"]),
         "baddns": sorted(results["baddns"])
