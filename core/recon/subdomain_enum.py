@@ -68,6 +68,7 @@ def enumerate_subdomains(domain):
                 sub = line.strip().split(",")[0].split("//")[-1].split("/")[0]
                 with open(all_subs_file, "a") as af:
                     af.write(sub + "\n")
+		    
     '''
     # Deduplicate
     with open(all_subs_file, "r") as f:
