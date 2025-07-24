@@ -42,10 +42,10 @@ RUN git clone --depth=1 https://github.com/incogbyte/shosubgo.git /opt/shosubgo 
     mv shosubgo /usr/bin/shosubgo && rm -rf /opt/shosubgo
 
 # Install Arjun
-RUN git clone --depth=1 https://github.com/s0md3v/Arjun.git /opt/Arjun && \
-    ln -s /opt/Arjun/arjun /usr/bin/arjun && \
-    chmod +x /opt/Arjun/arjun/__main__.py && \
-    rm -rf /opt/Arjun/.git
+# RUN git clone --depth=1 https://github.com/s0md3v/Arjun.git /opt/Arjun && \
+#     ln -s /opt/Arjun/arjun /usr/bin/arjun && \
+#     chmod +x /opt/Arjun/arjun/__main__.py && \
+#     rm -rf /opt/Arjun/.git
 
 # Install ParamSpider
 RUN git clone --depth=1 https://github.com/devanshbatham/ParamSpider.git /opt/ParamSpider && \
