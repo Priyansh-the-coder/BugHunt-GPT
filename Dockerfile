@@ -16,7 +16,7 @@ RUN curl -OL https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
     rm go${GO_VERSION}.linux-amd64.tar.gz
 
 # Install Python dependencies
-RUN git clone https://github.com/ChillSharma/BadDNS.git /opt/baddns && \
+RUN git clone https://github.com/blacklanternsecurity/baddns.git /opt/baddns && \
     pip3 install -r /opt/baddns/requirements.txt && \
     ln -s /opt/baddns/baddns.py /usr/bin/baddns && \
     chmod +x /opt/baddns/baddns.py
