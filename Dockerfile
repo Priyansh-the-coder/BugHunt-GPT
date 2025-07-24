@@ -15,11 +15,18 @@ RUN curl -OL https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
     ln -s /usr/local/go/bin/go /usr/bin/go && \
     rm go${GO_VERSION}.linux-amd64.tar.gz
 
-# Install Python dependencies
-RUN git clone https://github.com/blacklanternsecurity/baddns.git /opt/baddns && \
-    pip3 install -r /opt/baddns/requirements.txt && \
-    ln -s /opt/baddns/baddns.py /usr/bin/baddns && \
-    chmod +x /opt/baddns/baddns.py
+# Install git and pip if not already installed
+RUN apt-get update && apt-get install -y git python3-pip
+
+# Clone the BadDNS repo
+RUN git clone https://github.com/blacklanternsecurity/baddns.git /opt/baddns
+
+# Install dnspython manually (no requirements.txt exists)
+RUN pip3 install dnspython
+
+# Link the baddns.py script (note the correct path)
+RUN ln -s /opt/baddns/baddns/baddns.py /usr/bin/baddns && chmod +x /opt/baddns/baddns/baddns.py
+
     
 # --- Install Go-based tools ---
 RUN go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest && \
