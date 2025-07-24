@@ -8,19 +8,19 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "BugHUnt-GPT API is live!"
+    return "BugHunt-GPT API is live!"
 
 @app.route("/subdomains")
 def get_subdomains():
     domain = request.args.get("domain")
     if not domain:
-        return jsonify({"error": "No domain provided"}), 400
+        return "No domain provided", 400
 
     try:
         results = enumerate_subdomains(domain)
-        return jsonify({"live_subdomains": results})
+        return str(results), 200  # Return as string representation of a Python list
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return str(e), 500
 
 @app.route("/takeover",methods=['POST'])
 def run_takeover():
