@@ -15,18 +15,18 @@ RUN curl -OL https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
     ln -s /usr/local/go/bin/go /usr/bin/go && \
     rm go${GO_VERSION}.linux-amd64.tar.gz
 
-# Install git and pip if not already installed
-RUN apt-get update && apt-get install -y git python3-pip
+# Install base deps
+RUN apt-get update && apt-get install -y git curl python3-pip
 
-# Clone the BadDNS repo
-RUN git clone https://github.com/blacklanternsecurity/baddns.git /opt/baddns
+# Install subjack
+RUN go install github.com/haccer/subjack@latest && \
+    mkdir -p /usr/share/subjack && \
+    curl -o /usr/share/subjack/fingerprints.json https://raw.githubusercontent.com/haccer/subjack/master/fingerprints.json && \
+    ln -s /root/go/bin/subjack /usr/bin/subjack
 
-# Install dnspython manually (no requirements.txt exists)
-RUN pip3 install dnspython
-
-# Link the baddns.py script (note the correct path)
-RUN ln -s /opt/baddns/baddns/baddns.py /usr/bin/baddns && chmod +x /opt/baddns/baddns/baddns.py
-
+# Install dnsx
+RUN go install github.com/projectdiscovery/dnsx/cmd/dnsx@latest && \
+    ln -s /root/go/bin/dnsx /usr/bin/dnsx
     
 # --- Install Go-based tools ---
 RUN go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest && \
