@@ -15,6 +15,12 @@ RUN curl -OL https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
     ln -s /usr/local/go/bin/go /usr/bin/go && \
     rm go${GO_VERSION}.linux-amd64.tar.gz
 
+# Install Python dependencies
+RUN git clone https://github.com/ChillSharma/BadDNS.git /opt/baddns && \
+    pip3 install -r /opt/baddns/requirements.txt && \
+    ln -s /opt/baddns/baddns.py /usr/bin/baddns && \
+    chmod +x /opt/baddns/baddns.py
+    
 # --- Install Go-based tools ---
 RUN go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest && \
     go install github.com/tomnomnom/assetfinder@latest && \
@@ -26,13 +32,6 @@ RUN go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest && 
     ln -s /root/go/bin/amass /usr/bin/amass && \
     ln -s /root/go/bin/httpx /usr/bin/httpx && \
     ln -s /root/go/bin/subjack /usr/bin/subjack
-
-# Install Python dependencies
-RUN apt-get update && apt-get install -y python3-pip git && \
-    git clone https://github.com/ChillSharma/BadDNS.git /opt/baddns && \
-    pip3 install -r /opt/baddns/requirements.txt && \
-    ln -s /opt/baddns/baddns.py /usr/bin/baddns && \
-    chmod +x /opt/baddns/baddns.py
 
 # --- Install cero ---
 RUN git clone https://github.com/glebarez/cero.git /opt/cero && \
