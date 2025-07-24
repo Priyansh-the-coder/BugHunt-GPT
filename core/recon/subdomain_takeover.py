@@ -1,63 +1,79 @@
 # core/recon/subdomain_takeover.py
 
 import subprocess
+import os
+import re
 
 def check_takeover(subdomains):
     print("[+] Writing input subdomains to 'live_subs.txt'")
     with open("live_subs.txt", "w") as f:
         for sub in subdomains:
-            f.write(sub.replace("https://", "").replace("http://", "").strip() + "\n")
+            cleaned = sub.replace("https://", "").replace("http://", "").strip()
+            f.write(cleaned + "\n")
 
     print("[+] Running subjack...")
     try:
         subprocess.run([
             "subjack", "-w", "live_subs.txt",
             "-t", "100", "-timeout", "30", "-ssl",
-            "-c", "/usr/share/subjack/fingerprints.json",  
+            "-c", "/usr/share/subjack/fingerprints.json",
             "-o", "subjack_results.txt", "-v"
         ])
     except Exception as e:
         print(f"[!] subjack failed: {e}")
 
-    print("[+] Running BadDNS...")
-    
-    # Run dnsx (used by BadDNS)
+    print("[+] Running BadDNS (dnsx)...")
     try:
-        result = subprocess.run(
-            ["dnsx", "-l", "subs.txt", "-o", "dnsx_output.txt"],
+        subprocess.run(
+            ["dnsx", "-l", "live_subs.txt", "-o", "dnsx_output.txt"],
             capture_output=True, text=True
         )
     except Exception as e:
         print(f"[!] BadDNS failed: {e}")
-    
-    results = {
-        "subjack": set(),
-        "baddns": set()
-    }
-    
-    # Read Subjack Results
+
+    subjack_data = {}
     try:
         with open("subjack_results.txt", "r") as f:
             for line in f:
-                if line.strip():
-                    results["subjack"].add(line.strip())
+                # Example line: blog.example.com -> username.github.io [404] There isn't a GitHub Pages site here
+                match = re.match(r"(.+?)\s*->\s*(.+?)\s*\[(\d{3})\]\s*(.+)", line.strip())
+                if match:
+                    subdomain, cname, status_code, body = match.groups()
+                    subjack_data[subdomain.strip()] = {
+                        "cname": cname.strip(),
+                        "status_code": int(status_code),
+                        "response_body": body.strip(),
+                        "tool_detected": True
+                    }
     except FileNotFoundError:
         print("[!] subjack_results.txt not found.")
-    
-    # Read BadDNS (dnsx) Results
+
+    baddns_data = set()
     try:
-        with open("dnsx_output.txt", "r") as f:  # ✅ Correct filename!
+        with open("dnsx_output.txt", "r") as f:
             for line in f:
-                if "Possible Takeover" in line or "Vulnerable" in line:
-                    results["baddns"].add(line.strip())
+                line = line.strip()
+                for sub in subdomains:
+                    sub_clean = sub.replace("https://", "").replace("http://", "").strip()
+                    if sub_clean in line and ("Possible Takeover" in line or "Vulnerable" in line):
+                        baddns_data.add(sub_clean)
     except FileNotFoundError:
-        print("[!] dnsx_output.txt not found.")  # ✅ Corrected filename
-    
-    # ✅ Corrected keys and filenames in print and return statements
-    print(f"[✓] {len(results['subjack'])} unique potential takeovers found by subjack.")
-    print(f"[✓] {len(results['baddns'])} unique potential takeovers found by BadDNS.")
-    
-    return {
-        "subjack": sorted(results["subjack"]),
-        "baddns": sorted(results["baddns"])
-    }
+        print("[!] dnsx_output.txt not found.")
+
+    final_results = []
+
+    for sub in subdomains:
+        sub_clean = sub.replace("https://", "").replace("http://", "").strip()
+
+        result = {
+            "subdomain": sub_clean,
+            "cname": subjack_data.get(sub_clean, {}).get("cname", None),
+            "status_code": subjack_data.get(sub_clean, {}).get("status_code", None),
+            "response_body": subjack_data.get(sub_clean, {}).get("response_body", None),
+            "tool_detected": sub_clean in subjack_data or sub_clean in baddns_data
+        }
+
+        final_results.append(result)
+
+    print(f"[✓] Formatted output for {len(final_results)} subdomains.")
+    return final_results
