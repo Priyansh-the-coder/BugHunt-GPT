@@ -27,6 +27,13 @@ RUN go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest && 
     ln -s /root/go/bin/httpx /usr/bin/httpx && \
     ln -s /root/go/bin/subjack /usr/bin/subjack
 
+# Install Python dependencies
+RUN apt-get update && apt-get install -y python3-pip git && \
+    git clone https://github.com/ChillSharma/BadDNS.git /opt/baddns && \
+    pip3 install -r /opt/baddns/requirements.txt && \
+    ln -s /opt/baddns/baddns.py /usr/bin/baddns && \
+    chmod +x /opt/baddns/baddns.py
+
 # --- Install cero ---
 RUN git clone https://github.com/glebarez/cero.git /opt/cero && \
     cd /opt/cero && go build && \
@@ -53,13 +60,6 @@ RUN git clone https://github.com/devanshbatham/ParamSpider.git /opt/ParamSpider 
     pip install requests urllib3 && \
     ln -s /opt/ParamSpider/paramspider /usr/bin/paramspider && \
     chmod +x /opt/ParamSpider/paramspider/main.py
-
-# Clone the BadDNS repository
-RUN git clone https://github.com/ChillSharma/BadDNS.git && \
-    ln -s /root/go/bin/BadDNS /usr/bin/baddns
-
-RUN mkdir -p /usr/share/subjack && \
-    wget -O /usr/share/subjack/fingerprints.json https://raw.githubusercontent.com/haccer/subjack/master/fingerprints.json
 
 # Install Findomain (9.0.3)
 RUN wget https://github.com/findomain/findomain/releases/download/9.0.3/findomain-linux.zip -O /tmp/findomain.zip && \
