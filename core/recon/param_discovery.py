@@ -68,8 +68,8 @@ def discover_all_parameters(domain):
                 if "?" in url:
                     collected_urls.add(url)
 
-    if paramspider_file:
-        arjun_file = run_arjun(paramspider_file)
+    
+    arjun_file = run_arjun(paramspider_file)
 
     if arjun_file:
         with open(arjun_file, "r") as f:
