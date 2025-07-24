@@ -12,9 +12,9 @@ def enumerate_subdomains(domain):
     # Passive Enumeration
     subprocess.run(["subfinder", "-d", domain, "-silent"], stdout=open(all_subs_file, "a"), check=True)
     print("[+] Run subfinder done")
-    subprocess.run(["assetfinder", "--subs-only", domain], stdout=open(all_subs_file, "a"), check=True)
+    '''subprocess.run(["assetfinder", "--subs-only", domain], stdout=open(all_subs_file, "a"), check=True)
     print("[+] Run assetfinder done")
-    '''result = subprocess.run(
+    result = subprocess.run(
         ["amass", "enum", "-passive", "-d", domain, "-rf", '/root/BugHunt-GPT/core/recon/resolvers.txt'],
    	stdout=open(all_subs_file, "a"),
    	stderr=subprocess.PIPE,
