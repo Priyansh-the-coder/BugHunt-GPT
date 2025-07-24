@@ -20,10 +20,12 @@ RUN go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest && 
     go install github.com/tomnomnom/assetfinder@latest && \
     go install github.com/owasp-amass/amass/v4/...@latest && \
     go install github.com/projectdiscovery/httpx/cmd/httpx@latest && \
+    go install github.com/haccer/subjack@latest && \
     ln -s /root/go/bin/subfinder /usr/bin/subfinder && \
     ln -s /root/go/bin/assetfinder /usr/bin/assetfinder && \
     ln -s /root/go/bin/amass /usr/bin/amass && \
     ln -s /root/go/bin/httpx /usr/bin/httpx
+    ln -s /root/go/bin/subjack /usr/bin/subjack
 
 # --- Install cero ---
 RUN git clone https://github.com/glebarez/cero.git /opt/cero && \
@@ -52,6 +54,9 @@ RUN git clone https://github.com/devanshbatham/ParamSpider.git /opt/ParamSpider 
     ln -s /opt/ParamSpider/paramspider /usr/bin/paramspider && \
     chmod +x /opt/ParamSpider/paramspider/main.py
 
+# Clone the BadDNS repository
+RUN git clone https://github.com/ChillSharma/BadDNS.git && \
+    ln -s /root/go/bin/BadDNS /usr/bin/baddns
 
 # Install Findomain (9.0.3)
 RUN wget https://github.com/findomain/findomain/releases/download/9.0.3/findomain-linux.zip -O /tmp/findomain.zip && \
