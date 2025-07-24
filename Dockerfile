@@ -58,6 +58,9 @@ RUN git clone https://github.com/devanshbatham/ParamSpider.git /opt/ParamSpider 
 RUN git clone https://github.com/ChillSharma/BadDNS.git && \
     ln -s /root/go/bin/BadDNS /usr/bin/baddns
 
+RUN mkdir -p /usr/share/subjack && \
+    wget -O /usr/share/subjack/fingerprints.json https://raw.githubusercontent.com/haccer/subjack/master/fingerprints.json
+
 # Install Findomain (9.0.3)
 RUN wget https://github.com/findomain/findomain/releases/download/9.0.3/findomain-linux.zip -O /tmp/findomain.zip && \
     unzip /tmp/findomain.zip -d /tmp/ && \
