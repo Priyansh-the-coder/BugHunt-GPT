@@ -3,12 +3,21 @@ FROM debian:bullseye-slim
 ENV DEBIAN_FRONTEND=noninteractive
 ENV GO_VERSION=1.23.11
 ENV PATH="/usr/local/go/bin:/root/go/bin:$PATH"
+ENV PLAYWRIGHT_BROWSERS_PATH="/ms-playwright"
 
 # Install core dependencies
 RUN apt update && apt install -y \
     curl wget unzip git python3 python3-pip build-essential \
-    libpcap-dev dnsutils python3-dnspython jq ca-certificates && \
-    rm -rf /var/lib/apt/lists/*
+    libpcap-dev dnsutils python3-dnspython jq ca-certificates \
+    # Playwright dependencies
+    libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 libcups2 \
+    libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 \
+    libxrandr2 libgbm1 libasound2 libatspi2.0-0 libwayland-client0 \
+    # Additional recommended dependencies
+    libharfbuzz-icu0 libglib2.0-0 libgstreamer-plugins-base1.0-0 \
+    libgstreamer1.0-0 libhyphen0 libicu67 libjpeg62-turbo libpng16-16 \
+    libwebp6 libwoff1 \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Go
 RUN curl -OL https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
@@ -20,8 +29,6 @@ RUN curl -OL https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
 RUN go install github.com/haccer/subjack@latest && \
     go install github.com/projectdiscovery/dnsx/cmd/dnsx@latest && \
     go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest && \
-    #go install github.com/tomnomnom/assetfinder@latest && \
-    #go install github.com/owasp-amass/amass/v4/...@latest && \
     go install github.com/projectdiscovery/httpx/cmd/httpx@latest && \
     go install github.com/lc/gau/v2/cmd/gau@latest && \
     go install github.com/tomnomnom/waybackurls@latest && \
@@ -41,19 +48,12 @@ RUN git clone --depth=1 https://github.com/incogbyte/shosubgo.git /opt/shosubgo 
     cd /opt/shosubgo && go build -o shosubgo main.go && \
     mv shosubgo /usr/bin/shosubgo && rm -rf /opt/shosubgo
 
-# Install Arjun
-# RUN git clone --depth=1 https://github.com/s0md3v/Arjun.git /opt/Arjun && \
-#     ln -s /opt/Arjun/arjun /usr/bin/arjun && \
-#     chmod +x /opt/Arjun/arjun/__main__.py && \
-#     rm -rf /opt/Arjun/.git
-
 # Install ParamSpider
 RUN git clone --depth=1 https://github.com/devanshbatham/ParamSpider.git /opt/ParamSpider && \
     pip install --no-cache-dir requests urllib3 && \
     ln -s /opt/ParamSpider/paramspider /usr/bin/paramspider && \
     chmod +x /opt/ParamSpider/paramspider/main.py && \
     rm -rf /opt/ParamSpider/.git
-
 
 # Install Findomain
 RUN wget -q https://github.com/findomain/findomain/releases/download/9.0.3/findomain-linux.zip -O /tmp/findomain.zip && \
@@ -65,28 +65,9 @@ RUN wget -q https://github.com/findomain/findomain/releases/download/9.0.3/findo
 # Set working dir and install Python deps
 WORKDIR /app
 COPY requirements.txt /app/requirements.txt
-RUN pip3 install --no-cache-dir -r requirements.txt
-
-# Add these lines to your existing Dockerfile
-RUN apt-get update && apt-get install -y \
-    libnss3 \
-    libnspr4 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libdrm2 \
-    libxkbcommon0 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxfixes3 \
-    libxrandr2 \
-    libgbm1 \
-    libasound2 \
-    libatspi2.0-0 \
-    libwayland-client0
-
-RUN python -m playwright install chromium
-RUN python -m playwright install-deps
+RUN pip3 install --no-cache-dir -r requirements.txt && \
+    python3 -m playwright install && \
+    python3 -m playwright install-deps
 
 # Copy rest of the project
 COPY . /app
