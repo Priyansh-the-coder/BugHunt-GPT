@@ -1,2 +1,4 @@
 flask
 colorama
+playwright>=1.20.0
+httpx>=0.23.0
