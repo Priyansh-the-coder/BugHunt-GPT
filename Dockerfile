@@ -54,6 +54,7 @@ RUN git clone --depth=1 https://github.com/devanshbatham/ParamSpider.git /opt/Pa
     chmod +x /opt/ParamSpider/paramspider/main.py && \
     rm -rf /opt/ParamSpider/.git
 
+
 # Install Findomain
 RUN wget -q https://github.com/findomain/findomain/releases/download/9.0.3/findomain-linux.zip -O /tmp/findomain.zip && \
     unzip -q /tmp/findomain.zip -d /tmp/ && \
@@ -65,6 +66,27 @@ RUN wget -q https://github.com/findomain/findomain/releases/download/9.0.3/findo
 WORKDIR /app
 COPY requirements.txt /app/requirements.txt
 RUN pip3 install --no-cache-dir -r requirements.txt
+
+# Add these lines to your existing Dockerfile
+RUN apt-get update && apt-get install -y \
+    libnss3 \
+    libnspr4 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libdrm2 \
+    libxkbcommon0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxrandr2 \
+    libgbm1 \
+    libasound2 \
+    libatspi2.0-0 \
+    libwayland-client0
+
+RUN python -m playwright install chromium
+RUN python -m playwright install-deps
 
 # Copy rest of the project
 COPY . /app
