@@ -1,4 +1,4 @@
-flask>=2.2.0
+flask[async]>=2.2.0
 colorama
 playwright>=1.20.0
 httpx>=0.23.0
