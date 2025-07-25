@@ -1,5 +1,7 @@
 import os
 from flask import Flask, request, jsonify
+import asyncio
+from functools import wraps
 from core.recon.subdomain_enum import enumerate_subdomains
 from core.recon.url_collector import collect_urls
 from core.recon.param_discovery import discover_all_parameters
@@ -9,23 +11,34 @@ from ast import literal_eval
 
 app = Flask(__name__)
 
+# Async wrapper for Flask routes
+def async_route(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        return asyncio.run(f(*args, **kwargs))
+    return wrapper
+    
 @app.route("/")
 def home():
     return "BugHunt-GPT API is live!"
 
 @app.route('/burp_capture', methods=['GET', 'POST'])
+@async_route
 async def burp_capture_endpoint():
-    if request.method == 'POST':
-        url = request.json.get('url')
-    else:
-        url = request.args.get('url')
-
-    if not url:
-        return jsonify({'error': 'URL parameter is required'}), 400
-
     try:
-        data = await burp_capture(url)
+        # Get URL from request
+        url = request.json.get('url') if request.method == 'POST' else request.args.get('url')
+        if not url:
+            return jsonify({'error': 'URL parameter is required'}), 400
+        
+        if not url.startswith(('http://', 'https://')):
+            url = f'https://{url}'
+
+        # Execute the capture
+        from core.utils.burp_proxy import capture_data
+        data = await capture_data(url)
         return jsonify(data)
+        
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
