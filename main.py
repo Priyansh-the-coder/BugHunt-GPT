@@ -1,5 +1,6 @@
 import os
 from flask import Flask, request, jsonify
+from flask.helpers import ensure_async
 from core.recon.subdomain_enum import enumerate_subdomains
 from core.recon.url_collector import collect_urls
 from core.recon.param_discovery import discover_all_parameters
@@ -14,7 +15,7 @@ def home():
     return "BugHunt-GPT API is live!"
 
 @app.route('/burp_capture', methods=['GET', 'POST'])
-async def burp_capture_endpoint():
+def burp_capture_endpoint():  # Remove async here
     if request.method == 'POST':
         url = request.json.get('url')
     else:
@@ -23,14 +24,14 @@ async def burp_capture_endpoint():
     if not url:
         return jsonify({'error': 'URL parameter is required'}), 400
 
-    if not url.startswith(('http://', 'https://')):
-        url = 'https://' + url
+    async def async_wrapper():
+        try:
+            data = await burp_capture(url)
+            return jsonify(data)
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
 
-    try:
-        data = await burp_capture(url)
-        return jsonify(data)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    return ensure_async(async_wrapper)()
 
 @app.route("/subdomains")
 def get_subdomains():
