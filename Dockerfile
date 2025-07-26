@@ -3,7 +3,6 @@ FROM debian:bullseye-slim
 ENV DEBIAN_FRONTEND=noninteractive
 ENV GO_VERSION=1.23.11
 ENV PATH="/usr/local/go/bin:/root/go/bin:$PATH"
-ENV PLAYWRIGHT_BROWSERS_PATH="/ms-playwright"
 
 # Install core dependencies
 RUN apt update && apt install -y \
@@ -65,9 +64,6 @@ RUN wget -q https://github.com/findomain/findomain/releases/download/9.0.3/findo
 # Set working dir and install Python deps
 WORKDIR /app
 COPY requirements.txt /app/requirements.txt
-RUN pip3 install --no-cache-dir -r requirements.txt && \
-    python3 -m playwright install && \
-    python3 -m playwright install-deps
 
 # Copy rest of the project
 COPY . /app
