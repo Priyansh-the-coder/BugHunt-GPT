@@ -63,7 +63,8 @@ def param_discovery():
     domain = request.args.get('domain')
     if not domain:
         return jsonify({"error": "Domain parameter is required"}), 400
-
+    if domain.startswith("http://") or domain.startswith("https://"):
+        domain = domain.split("://", 1)[1]
     try:
         param_names, param_map = discover_all_parameters(domain)
 
