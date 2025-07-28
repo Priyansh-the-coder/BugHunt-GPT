@@ -3,6 +3,7 @@
 import subprocess
 import os
 import re
+from urllib.parse import urlparse, parse_qs, urlencode
 
 EXTENSION_BLACKLIST = [".jpg", ".png", ".css", ".js", ".svg", ".woff", ".ttf", ".ico"]
 STATIC_EXTENSIONS_RE = re.compile(r".*\.(" + "|".join([e.lstrip('.') for e in EXTENSION_BLACKLIST]) + r")(\?.*)?$", re.IGNORECASE)
@@ -30,7 +31,6 @@ def is_valid_url(url):
     return False
 
 def clean_urls(urls):
-    # Deduplicate, normalize, and filter
     cleaned = set()
     for url in urls:
         url = url.strip()
@@ -46,6 +46,46 @@ def run_waybackurls(domain):
     print(f"[+] Running waybackurls on {domain}")
     return run_tool(["waybackurls"], input_text=domain)
 
+# ------------------------
+# 👇 NEW FUNCTION: GROUPING
+# ------------------------
+
+def group_similar_urls(urls):
+    from collections import defaultdict
+
+    grouped = defaultdict(lambda: defaultdict(set))
+    no_params = set()
+
+    for url in urls:
+        parsed = urlparse(url)
+        base = parsed.scheme + "://" + parsed.netloc + parsed.path
+        params = parse_qs(parsed.query)
+
+        if not params:
+            no_params.add(base)
+            continue
+
+        for key, values in params.items():
+            for val in values:
+                grouped[base][key].add(val)
+
+    grouped_urls = []
+
+    for base, param_map in grouped.items():
+        query_parts = []
+        for key, values in param_map.items():
+            if len(values) == 1:
+                query_parts.append(f"{key}={next(iter(values))}")
+            else:
+                joined_vals = ",".join(sorted(values))
+                query_parts.append(f"{key}={{{joined_vals}}}")
+        grouped_urls.append(f"{base}?" + "&".join(query_parts))
+
+    grouped_urls.extend(no_params)
+    return grouped_urls
+
+# ------------------------
+
 def collect_urls(domain, max_urls=3000):
     gau_urls = run_gau(domain)
     wayback_urls = run_waybackurls(domain)
@@ -55,13 +95,11 @@ def collect_urls(domain, max_urls=3000):
 
     # Optional: Sort by priority (URLs with params come first)
     sorted_urls = sorted(cleaned, key=lambda u: ('?' not in u, len(u)))
+    limited_urls = sorted_urls[:max_urls]
 
-    final_urls = sorted_urls[:max_urls]  # Limit total token size
-    print(f"[✓] Final URL count (after dedup/filter): {len(final_urls)}")
+    print(f"[✓] Final URL count (after dedup/filter): {len(limited_urls)}")
 
-    # # Save output
-    # os.makedirs("output", exist_ok=True)
-    # with open(f"output/{domain}_urls.txt", "w") as f:
-    #     f.write("\n".join(final_urls))
+    # 👉 Apply grouping before returning
+    grouped_urls = group_similar_urls(limited_urls)
 
-    return final_urls
+    return grouped_urls
