@@ -59,9 +59,9 @@ def collect_urls(domain, max_urls=3000):
     final_urls = sorted_urls[:max_urls]  # Limit total token size
     print(f"[✓] Final URL count (after dedup/filter): {len(final_urls)}")
 
-    # Save output
-    os.makedirs("output", exist_ok=True)
-    with open(f"output/{domain}_urls.txt", "w") as f:
-        f.write("\n".join(final_urls))
+    # # Save output
+    # os.makedirs("output", exist_ok=True)
+    # with open(f"output/{domain}_urls.txt", "w") as f:
+    #     f.write("\n".join(final_urls))
 
     return final_urls
