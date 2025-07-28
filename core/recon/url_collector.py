@@ -1,9 +1,8 @@
-import subprocess
-import os
+import asyncio
 import re
-from urllib.parse import urlparse, parse_qs, urlencode
+from urllib.parse import urlparse, parse_qs
 from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import List, Set, Dict
 
 # Constants
 EXTENSION_BLACKLIST = {".jpg", ".png", ".css", ".js", ".svg", ".woff", ".ttf", ".ico"}
@@ -12,31 +11,34 @@ STATIC_EXTENSIONS_RE = re.compile(
     re.IGNORECASE
 )
 
-def run_tool(command, input_text=None):
+async def run_tool(command: List[str], input_text: str = None) -> List[str]:
     try:
-        result = subprocess.run(
-            command,
-            input=input_text,
-            capture_output=True,  # More efficient than separate stdout/stderr
-            text=True,
-            check=True  # Raises exception on non-zero exit code
+        proc = await asyncio.create_subprocess_exec(
+            *command,
+            stdin=asyncio.subprocess.PIPE if input_text else None,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
         )
-        return result.stdout.strip().split("\n")
-    except subprocess.CalledProcessError as e:
-        print(f"[!] Error running {' '.join(command)}: {e.stderr}")
-        return []
+        
+        stdout, stderr = await proc.communicate(input=input_text.encode() if input_text else None)
+        
+        if proc.returncode != 0:
+            print(f"[!] Error running {' '.join(command)}: {stderr.decode().strip()}")
+            return []
+            
+        return stdout.decode().strip().split("\n")
     except Exception as e:
         print(f"[!] Unexpected error: {e}")
         return []
 
-def is_valid_url(url):
+def is_valid_url(url: str) -> bool:
     url = url.strip()
     return (url.startswith(("http://", "https://")) and 
             not STATIC_EXTENSIONS_RE.match(url))
 
-def clean_urls(urls):
-    seen = set()
-    cleaned = []
+def clean_urls(urls: List[str]) -> List[str]:
+    seen: Set[str] = set()
+    cleaned: List[str] = []
     for url in urls:
         if not url:
             continue
@@ -46,27 +48,26 @@ def clean_urls(urls):
             cleaned.append(clean_url)
     return cleaned
 
-def run_tools_concurrently(domain):
-    with ThreadPoolExecutor(max_workers=2) as executor:
-        gau_future = executor.submit(run_gau, domain)
-        wayback_future = executor.submit(run_waybackurls, domain)
-        
-        results = []
-        for future in as_completed([gau_future, wayback_future]):
-            results.extend(future.result())
-        return results
-
-def run_gau(domain):
+async def run_gau(domain: str) -> List[str]:
     print(f"[+] Running gau on {domain}")
-    return run_tool(["gau", "--threads", "10", domain])  # Use gau's built-in threading
+    return await run_tool(["gau", "--threads", "10", "--subs", domain])
 
-def run_waybackurls(domain):
+async def run_waybackurls(domain: str) -> List[str]:
     print(f"[+] Running waybackurls on {domain}")
-    return run_tool(["waybackurls"], input_text=domain)
+    return await run_tool(["waybackurls"], input_text=domain)
 
-def group_similar_urls(urls):
-    grouped = defaultdict(lambda: defaultdict(set))
-    no_params = set()
+async def run_tools_concurrently(domain: str) -> List[str]:
+    gau_task = asyncio.create_task(run_gau(domain))
+    wayback_task = asyncio.create_task(run_waybackurls(domain))
+    
+    results = []
+    for task in asyncio.as_completed([gau_task, wayback_task]):
+        results.extend(await task)
+    return results
+
+def group_similar_urls(urls: List[str]) -> List[str]:
+    grouped: Dict[str, Dict[str, Set[str]] = defaultdict(lambda: defaultdict(set))
+    no_params: Set[str] = set()
 
     for url in urls:
         try:
@@ -84,7 +85,7 @@ def group_similar_urls(urls):
             print(f"[!] Error parsing URL {url}: {e}")
             continue
 
-    grouped_urls = []
+    grouped_urls: List[str] = []
     for base, param_map in grouped.items():
         query_parts = []
         for key, values in param_map.items():
@@ -97,9 +98,9 @@ def group_similar_urls(urls):
     grouped_urls.extend(no_params)
     return grouped_urls
 
-def collect_urls(domain, max_urls=3000):
+async def collect_urls(domain: str, max_urls: int = 3000) -> List[str]:
     # Run tools in parallel
-    combined = run_tools_concurrently(domain)
+    combined = await run_tools_concurrently(domain)
     
     # Clean and filter URLs
     cleaned = clean_urls(combined)
@@ -117,3 +118,6 @@ def collect_urls(domain, max_urls=3000):
     
     # Group similar URLs
     return group_similar_urls(limited_urls)
+
+# Example usage:
+# asyncio.run(collect_urls("example.com"))
