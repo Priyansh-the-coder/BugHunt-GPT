@@ -1,4 +1,5 @@
 import os
+import asyncio
 from flask import Flask, request, jsonify
 from functools import wraps
 from core.recon.subdomain_enum import enumerate_subdomains
@@ -11,7 +12,12 @@ from ast import literal_eval
 
 app = Flask(__name__)
 
-    
+def async_to_sync(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        return asyncio.run(f(*args, **kwargs))
+    return wrapper
+
 @app.route("/")
 def home():
     return "BugHunt-GPT API is live!"
@@ -43,28 +49,24 @@ def get_subdomains():
 
     try:
         results = enumerate_subdomains(domain)
-        return str(results), 200  # Return as string representation of a Python list
+        return str(results), 200
     except Exception as e:
         return str(e), 500
 
 @app.route("/takeover", methods=['POST'])
 def run_takeover():
     try:
-        # Read raw data from request body
         raw_data = request.data.decode('utf-8')
-        # Allow empty input (interpreted as no subdomains)
         if not raw_data or raw_data=='[]':
             return jsonify({
                 "subdomains": [],
                 "results": [],
                 "message": "No subdomains provided"
             }), 200
-        subdomains = literal_eval(raw_data)  # Safely convert string to Python list
+        subdomains = literal_eval(raw_data)
 
-        # Validate it's a list of strings
         if not isinstance(subdomains, list) or not all(isinstance(i, str) for i in subdomains):
             return "Input must be a Python-style list of strings", 400
-        # If list is empty (e.g. `[]`)
         if not subdomains:
             return jsonify({
                 "subdomains": [],
@@ -72,20 +74,20 @@ def run_takeover():
                 "message": "Empty subdomain list received"
             }), 200
         takeover_results = check_takeover(subdomains)
-        return str(takeover_results), 200  # Return Python-style list as string
+        return str(takeover_results), 200
 
     except Exception as e:
         return str(e), 500
 
-
 @app.route("/collect_urls")
-def collect_urls_endpoint():
+@async_to_sync
+async def collect_urls_endpoint():
     domain = request.args.get("domain")
     if not domain:
         return jsonify({"error": "No domain provided"}), 400
 
     try:
-        urls = collect_urls(domain)
+        urls = await collect_urls(domain)
         return jsonify({"collected_urls": urls})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -109,16 +111,16 @@ def param_discovery():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/sub_json_to_list', methods=['POST'])
-def json_to_list():
-    try:
-        data = request.get_json()
-        subdomains = data.get("subdomains", [])
-        if not isinstance(subdomains, list):
-            return jsonify({"error": "subdomains must be a list"}), 400
-        return jsonify({"result": subdomains})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+# @app.route('/sub_json_to_list', methods=['POST'])
+# def json_to_list():
+#     try:
+#         data = request.get_json()
+#         subdomains = data.get("subdomains", [])
+#         if not isinstance(subdomains, list):
+#             return jsonify({"error": "subdomains must be a list"}), 400
+#         return jsonify({"result": subdomains})
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
