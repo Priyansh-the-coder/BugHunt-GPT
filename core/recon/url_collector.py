@@ -2,7 +2,7 @@ import asyncio
 import re
 from urllib.parse import urlparse, parse_qs
 from collections import defaultdict
-from typing import List, Set, Dict
+from typing import List, Set, Dict, Optional
 
 # Constants
 EXTENSION_BLACKLIST = {".jpg", ".png", ".css", ".js", ".svg", ".woff", ".ttf", ".ico"}
@@ -11,7 +11,7 @@ STATIC_EXTENSIONS_RE = re.compile(
     re.IGNORECASE
 )
 
-async def run_tool(command: List[str], input_text: str = None) -> List[str]:
+async def run_tool(command: List[str], input_text: Optional[str] = None) -> List[str]:
     try:
         proc = await asyncio.create_subprocess_exec(
             *command,
@@ -20,7 +20,9 @@ async def run_tool(command: List[str], input_text: str = None) -> List[str]:
             stderr=asyncio.subprocess.PIPE
         )
         
-        stdout, stderr = await proc.communicate(input=input_text.encode() if input_text else None)
+        stdout, stderr = await proc.communicate(
+            input=input_text.encode() if input_text else None
+        )
         
         if proc.returncode != 0:
             print(f"[!] Error running {' '.join(command)}: {stderr.decode().strip()}")
@@ -50,7 +52,7 @@ def clean_urls(urls: List[str]) -> List[str]:
 
 async def run_gau(domain: str) -> List[str]:
     print(f"[+] Running gau on {domain}")
-    return await run_tool(["gau", "--threads", "10", "--subs", domain])
+    return await run_tool(["gau", "--threads", "10", domain])
 
 async def run_waybackurls(domain: str) -> List[str]:
     print(f"[+] Running waybackurls on {domain}")
@@ -66,7 +68,7 @@ async def run_tools_concurrently(domain: str) -> List[str]:
     return results
 
 def group_similar_urls(urls: List[str]) -> List[str]:
-    grouped: Dict[str, Dict[str, Set[str]] = defaultdict(lambda: defaultdict(set))
+    grouped = defaultdict(lambda: defaultdict(set))  # Fixed syntax here
     no_params: Set[str] = set()
 
     for url in urls:
@@ -98,26 +100,14 @@ def group_similar_urls(urls: List[str]) -> List[str]:
     grouped_urls.extend(no_params)
     return grouped_urls
 
-async def collect_urls(domain: str, max_urls: int = 3000) -> List[str]:
-    # Run tools in parallel
+async def collect_urls_async(domain: str, max_urls: int = 3000) -> List[str]:
     combined = await run_tools_concurrently(domain)
-    
-    # Clean and filter URLs
     cleaned = clean_urls(combined)
-    
-    # Sort with priority to URLs with parameters
-    sorted_urls = sorted(
-        cleaned,
-        key=lambda u: ('?' not in u, len(u)),
-    )
-    
-    # Apply limit
+    sorted_urls = sorted(cleaned, key=lambda u: ('?' not in u, len(u)))
     limited_urls = sorted_urls[:max_urls]
-    
     print(f"[✓] Final URL count (after dedup/filter): {len(limited_urls)}")
-    
-    # Group similar URLs
     return group_similar_urls(limited_urls)
 
-# Example usage:
-# asyncio.run(collect_urls("example.com"))
+# Sync wrapper for Flask compatibility
+def collect_urls(domain: str, max_urls: int = 3000) -> List[str]:
+    return asyncio.run(collect_urls_async(domain, max_urls))
