@@ -1,4 +1,15 @@
 flask[async]>=2.2.0
 colorama
-playwright>=1.20.0
 httpx>=0.23.0
+aiofiles==23.1.0  # For async file operations
+python-dotenv==1.0.0  # For environment variables
+asgiref==3.7.2  # ASGI utilities
+
+# Performance Boosters
+uvloop==0.17.0  # Fast event loop replacement
+ciso8601==2.3.0  # Faster datetime parsing
+orjson==3.9.0  # Fast JSON library
+
+# Development
+pytest==7.4.0
+pytest-asyncio==0.21.1
