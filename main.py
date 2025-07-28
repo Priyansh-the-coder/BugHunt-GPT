@@ -34,7 +34,7 @@ def run_takeover():
         # Read raw data from request body
         raw_data = request.data.decode('utf-8')
         # Allow empty input (interpreted as no subdomains)
-        if not raw_data or raw_data='[]':
+        if not raw_data or raw_data=='[]':
             return jsonify({
                 "subdomains": [],
                 "results": [],
