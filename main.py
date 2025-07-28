@@ -33,12 +33,25 @@ def run_takeover():
     try:
         # Read raw data from request body
         raw_data = request.data.decode('utf-8')
+        # Allow empty input (interpreted as no subdomains)
+        if not raw_data or raw_data='[]':
+            return jsonify({
+                "subdomains": [],
+                "results": [],
+                "message": "No subdomains provided"
+            }), 200
         subdomains = literal_eval(raw_data)  # Safely convert string to Python list
 
         # Validate it's a list of strings
         if not isinstance(subdomains, list) or not all(isinstance(i, str) for i in subdomains):
             return "Input must be a Python-style list of strings", 400
-
+        # If list is empty (e.g. `[]`)
+        if not subdomains:
+            return jsonify({
+                "subdomains": [],
+                "results": [],
+                "message": "Empty subdomain list received"
+            }), 200
         takeover_results = check_takeover(subdomains)
         return str(takeover_results), 200  # Return Python-style list as string
 
