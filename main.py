@@ -80,7 +80,6 @@ def run_takeover():
         return str(e), 500
 
 @app.route("/collect_urls")
-@async_to_sync
 async def collect_urls_endpoint():
     domain = request.args.get("domain")
     if not domain:
@@ -91,6 +90,7 @@ async def collect_urls_endpoint():
         return jsonify({"collected_urls": urls})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @app.route('/param_discovery')
 def param_discovery():
