@@ -15,7 +15,25 @@ app = Flask(__name__)
 def home():
     return "BugHunt-GPT API is live!"
 
+@app.route("/port_scan", methods=["POST"])
+def port_scan():
+    try:
+        data = request.get_json(force=True)
+        domain = data.get("domain")
 
+        if not domain:
+            return jsonify({"error": "Missing 'domain' in request body"}), 400
+
+        results = scan_ports(domain)
+        return jsonify({
+            "domain": domain,
+            "open_ports": results,
+            "count": len(results)
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+        
 @app.route("/subdomains")
 def get_subdomains():
     domain = request.args.get("domain")
