@@ -2,7 +2,7 @@ import asyncio
 import re
 from urllib.parse import urlparse, parse_qs
 from collections import defaultdict
-from typing import List, Set, Dict, Optional
+from typing import List, Set, Dict
 
 # Constants
 EXTENSION_BLACKLIST = {".jpg", ".png", ".css", ".js", ".svg", ".woff", ".ttf", ".ico"}
@@ -11,7 +11,7 @@ STATIC_EXTENSIONS_RE = re.compile(
     re.IGNORECASE
 )
 
-async def run_tool(command: List[str], input_text: Optional[str] = None) -> List[str]:
+async def run_tool(command: List[str], input_text: str = None) -> List[str]:
     try:
         proc = await asyncio.create_subprocess_exec(
             *command,
@@ -39,8 +39,8 @@ def is_valid_url(url: str) -> bool:
             not STATIC_EXTENSIONS_RE.match(url))
 
 def clean_urls(urls: List[str]) -> List[str]:
-    seen: Set[str] = set()
-    cleaned: List[str] = []
+    seen = set()
+    cleaned = []
     for url in urls:
         if not url:
             continue
@@ -68,8 +68,8 @@ async def run_tools_concurrently(domain: str) -> List[str]:
     return results
 
 def group_similar_urls(urls: List[str]) -> List[str]:
-    grouped = defaultdict(lambda: defaultdict(set))  # Fixed syntax here
-    no_params: Set[str] = set()
+    grouped = defaultdict(lambda: defaultdict(set))
+    no_params = set()
 
     for url in urls:
         try:
@@ -87,7 +87,7 @@ def group_similar_urls(urls: List[str]) -> List[str]:
             print(f"[!] Error parsing URL {url}: {e}")
             continue
 
-    grouped_urls: List[str] = []
+    grouped_urls = []
     for base, param_map in grouped.items():
         query_parts = []
         for key, values in param_map.items():
@@ -110,4 +110,12 @@ async def collect_urls_async(domain: str, max_urls: int = 3000) -> List[str]:
 
 # Sync wrapper for Flask compatibility
 def collect_urls(domain: str, max_urls: int = 3000) -> List[str]:
-    return asyncio.run(collect_urls_async(domain, max_urls))
+    try:
+        # Try to use existing event loop if in async context
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        # Create new event loop if none exists
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+    
+    return loop.run_until_complete(collect_urls_async(domain, max_urls))
