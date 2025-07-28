@@ -4,7 +4,7 @@ httpx>=0.23.0
 aiofiles==23.1.0  # For async file operations
 python-dotenv==1.0.0  # For environment variables
 asgiref==3.7.2  # ASGI utilities
-
+playwright
 # Performance Boosters
 uvloop==0.17.0  # Fast event loop replacement
 ciso8601==2.3.0  # Faster datetime parsing
