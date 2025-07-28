@@ -50,7 +50,7 @@ def run_arjun(urls):
     print(f"[+] Running Arjun on collected URLs...")
 
     try:
-        input_data = "\n".join(urls).encode()
+        input_data = "\n".join(urls)
         result = subprocess.run(
             ["python3", "arjun/arjun.py", "--stdin", "--get", "--threads", "10"],
             input=input_data,
