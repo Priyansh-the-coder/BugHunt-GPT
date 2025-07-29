@@ -29,6 +29,8 @@ async def extract_parameters(urls: List[str]) -> Tuple[Set[str], Dict[str, List[
 
 
 async def run_paramspider(domain: str) -> List[str]:
+    print(f"[+] Running ParamSpider on: {domain}")
+
     paramspider_dir = os.environ.get("PARAMSPIDER_PATH", "/opt/ParamSpider")
     env = {**os.environ, "PYTHONPATH": paramspider_dir}
 
@@ -41,20 +43,21 @@ async def run_paramspider(domain: str) -> List[str]:
             env=env
         )
         stdout, stderr = await proc.communicate()
-        if proc.returncode != 0:
-            print("ParamSpider error:", stderr.decode())
-            return []
 
-        urls = set()
-        for line in stdout.decode().splitlines():
-            line = line.strip()
-            if "?" in line:
-                urls.add(line)
+        if proc.returncode != 0:
+            print(f"[!] ParamSpider failed.\nSTDERR:\n{stderr.decode()}\nSTDOUT:\n{stdout.decode()}")
+            raise RuntimeError(f"ParamSpider failed for domain: {domain}")
+
+        urls = {
+            line.strip() for line in stdout.decode().splitlines()
+            if "?" in line
+        }
         return list(urls)
 
     except Exception as e:
-        print(f"[!] ParamSpider execution failed: {e}")
-        return []
+        print(f"[!] Exception while running ParamSpider: {e}")
+        raise
+
 
 
 async def run_arjun(urls: List[str]) -> List[str]:
