@@ -123,22 +123,27 @@ def collect_urls_endpoint():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/param_discovery")
+@app.route('/param_discovery', methods=['GET'])
 def param_discovery():
     domain = request.args.get("domain")
     if not domain:
         return jsonify({"error": "Missing domain parameter"}), 400
 
     try:
-        param_names, param_map = discover_all_parameters_sync(domain)
+        param_names, param_map = discover_all_parameters(domain)
         return jsonify([{
             "domain": domain,
-            "parameters": list(param_names),
             "param_to_urls": param_map,
+            "parameters": list(param_names),
             "total_params_found": len(param_names)
-        }])
+        }]), 200
+
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        # This will surface the real error in the response
+        return jsonify({
+            "error": str(e),
+            "hint": "Likely a path or subprocess failure inside ParamSpider or Arjun"
+        }), 500
 
 # @app.route('/sub_json_to_list', methods=['POST'])
 # def json_to_list():
