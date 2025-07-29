@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from functools import wraps
 from core.recon.subdomain_enum import enumerate_subdomains
 from core.recon.url_collector import collect_urls
-from core.recon.param_discovery import discover_all_parameters
+from core.recon.param_discovery import discover_all_parameters_sync
 from core.recon.subdomain_takeover import check_takeover
 from core.utils.burp_proxy import capture_data as burp_capture
 from core.recon.port_scanner import scan_ports
@@ -131,7 +131,7 @@ def param_discovery():
     if domain.startswith("http://") or domain.startswith("https://"):
         domain = domain.split("://", 1)[1]
     try:
-        param_names, param_map = discover_all_parameters(domain)
+        param_names, param_map = discover_all_parameters_sync(domain)
 
         return jsonify({
             "domain": domain,
