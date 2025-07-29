@@ -30,32 +30,43 @@ async def extract_parameters(urls: List[str]) -> Tuple[Set[str], Dict[str, List[
     return param_names, param_map
 
 async def run_paramspider(domain: str) -> List[str]:
-    paramspider_main = "/opt/ParamSpider/paramspider/main.py"
+    print(f"[+] Running ParamSpider on: {domain}")
 
-    if not os.path.exists(paramspider_main):
-        raise FileNotFoundError(f"ParamSpider main.py not found at {paramspider_main}")
+    paramspider_dir = "/opt/ParamSpider"
+    main_script = os.path.join(paramspider_dir, "paramspider", "main.py")
+
+    if not os.path.exists(main_script):
+        raise FileNotFoundError(f"[!] ParamSpider script not found at: {main_script}")
+
+    env = {**os.environ}
 
     try:
         proc = await asyncio.create_subprocess_exec(
-            "python3", paramspider_main, "-d", domain,
+            "python3", main_script, "-d", domain,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
-            cwd="/opt/ParamSpider"
+            cwd=paramspider_dir,
+            env=env
         )
         stdout, stderr = await proc.communicate()
 
+        stdout_decoded = stdout.decode().strip()
+        stderr_decoded = stderr.decode().strip()
+
         if proc.returncode != 0:
-            raise RuntimeError(f"ParamSpider failed: {stderr.decode().strip()}")
+            raise RuntimeError(f"[!] ParamSpider failed (code {proc.returncode}): {stderr_decoded}")
 
         urls = set()
-        for line in stdout.decode().splitlines():
-            if "?" in line:
-                urls.add(line.strip())
+        for line in stdout_decoded.splitlines():
+            if "?" in (url := line.strip()):
+                urls.add(url)
 
+        print(f"[✓] ParamSpider found {len(urls)} URLs with parameters.")
         return list(urls)
 
     except Exception as e:
-        raise RuntimeError(f"ParamSpider execution error: {e}")
+        raise RuntimeError(f"[!] ParamSpider exception: {e}")
+
 
 # ---------------- Sync Wrapper ----------------
 
