@@ -3,7 +3,7 @@ import os
 from urllib.parse import urlparse, parse_qs
 from concurrent.futures import ThreadPoolExecutor
 from typing import Set, Dict, List, Tuple
-
+import glob
 # ---------------- Core Functions ----------------
 
 def _process_single_url(url: str) -> Tuple[Set[str], str]:
@@ -34,7 +34,7 @@ async def run_paramspider(domain: str) -> List[str]:
 
     paramspider_dir = "/opt/ParamSpider"
     main_script = os.path.join(paramspider_dir, "paramspider", "main.py")
-
+    raise RuntimeError(glob.glob("/opt/ParamSpider/paramspider/*"))
     if not os.path.exists(main_script):
         raise FileNotFoundError(f"[!] ParamSpider script not found at: {main_script}")
 
@@ -42,7 +42,7 @@ async def run_paramspider(domain: str) -> List[str]:
 
     try:
         proc = await asyncio.create_subprocess_exec(
-            "python3","paramspider/main.py", "-d", domain,
+            "python3",main_script, "-d", domain,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
             cwd=paramspider_dir,
