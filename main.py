@@ -123,22 +123,20 @@ def collect_urls_endpoint():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route('/param_discovery')
+@app.route("/param_discovery")
 def param_discovery():
-    domain = request.args.get('domain')
+    domain = request.args.get("domain")
     if not domain:
-        return jsonify({"error": "Domain parameter is required"}), 400
-    if domain.startswith("http://") or domain.startswith("https://"):
-        domain = domain.split("://", 1)[1]
+        return jsonify({"error": "Missing domain parameter"}), 400
+
     try:
         param_names, param_map = discover_all_parameters_sync(domain)
-
-        return jsonify({
+        return jsonify([{
             "domain": domain,
-            "total_params_found": len(param_names),
             "parameters": list(param_names),
-            "param_to_urls": param_map
-        })
+            "param_to_urls": param_map,
+            "total_params_found": len(param_names)
+        }])
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
