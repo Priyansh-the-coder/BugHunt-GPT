@@ -11,16 +11,6 @@ import logging
 app = Flask(__name__)
 
 
-
-# Thread pool for sync-to-async bridge
-executor = ThreadPoolExecutor(max_workers=10)
-client = None
-uvloop.install()
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
 def async_to_sync(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
