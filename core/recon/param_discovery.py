@@ -31,62 +31,33 @@ async def extract_parameters(urls: List[str]) -> Tuple[Set[str], Dict[str, List[
 async def run_paramspider(domain: str) -> List[str]:
     print(f"[+] Running ParamSpider on: {domain}")
 
-    paramspider_dir = os.environ.get("PARAMSPIDER_PATH", "/opt/ParamSpider")
-    env = {**os.environ, "PYTHONPATH": paramspider_dir}
+    paramspider_main = "/opt/ParamSpider/paramspider/main.py"
 
-    try:
-        proc = await asyncio.create_subprocess_exec(
-            "python3", "-m", "paramspider.main", "-d", domain,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            cwd=paramspider_dir,
-            env=env
-        )
-        stdout, stderr = await proc.communicate()
-
-        if proc.returncode != 0:
-            print(f"[!] ParamSpider failed.\nSTDERR:\n{stderr.decode()}\nSTDOUT:\n{stdout.decode()}")
-            raise RuntimeError(f"ParamSpider failed for domain: {domain}")
-
-        urls = {
-            line.strip() for line in stdout.decode().splitlines()
-            if "?" in line
-        }
-        return list(urls)
-
-    except Exception as e:
-        print(f"[!] Exception while running ParamSpider: {e}")
-        raise
-
-
-
-async def run_arjun(urls: List[str]) -> List[str]:
-    if not urls:
+    if not os.path.exists(paramspider_main):
+        print(f"[!] ParamSpider main.py not found at {paramspider_main}")
         return []
 
     try:
         proc = await asyncio.create_subprocess_exec(
-            "python3", "arjun/arjun.py", "--stdin", "--get", "--threads", "10",
-            stdin=asyncio.subprocess.PIPE,
+            "python3", paramspider_main, "-d", domain,
             stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
+            stderr=asyncio.subprocess.PIPE,
+            cwd="/opt/ParamSpider"
         )
-        input_data = "\n".join(urls)
-        stdout, stderr = await proc.communicate(input=input_data.encode())
+        stdout, stderr = await proc.communicate()
 
         if proc.returncode != 0:
-            print("Arjun error:", stderr.decode())
+            print(f"[!] ParamSpider error: {stderr.decode().strip()}")
             return []
 
-        arjun_urls = set()
+        urls = set()
         for line in stdout.decode().splitlines():
-            if "?" in line:
-                arjun_urls.add(line)
-
-        return list(arjun_urls)
+            if "?" in (url := line.strip()):
+                urls.add(url)
+        return list(urls)
 
     except Exception as e:
-        print(f"[!] Arjun execution failed: {e}")
+        print(f"[!] ParamSpider execution failed: {e}")
         return []
 
 
