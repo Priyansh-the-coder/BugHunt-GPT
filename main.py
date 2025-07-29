@@ -1,18 +1,12 @@
 from flask import Flask, request, jsonify
-from utils.burp_proxy import capture_data
-from utils.burp_repeater import init_app
-from utils.burp_intruder import intruder_engine, AttackType
-from utils.burp_sequencer import sequencer_engine
-from utils.burp_scanner import AdvancedBurpScanner
-import asyncio
-import os
-import time
-import threading
-import logging
-from concurrent.futures import ThreadPoolExecutor
-import uvloop
-import json
-from typing import Dict, Optional
+from functools import wraps
+from core.recon.subdomain_enum import enumerate_subdomains
+from core.recon.url_collector import collect_urls
+from core.recon.param_discovery import discover_all_parameters
+from core.recon.subdomain_takeover import check_takeover
+from core.utils.burp_proxy import capture_data as burp_capture
+from core.recon.port_scanner import scan_ports
+from ast import literal_eval
 
 app = Flask(__name__)
 
