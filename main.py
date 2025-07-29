@@ -80,13 +80,14 @@ def run_takeover():
         return str(e), 500
 
 @app.route("/collect_urls")
-async def collect_urls_endpoint():
+def collect_urls_endpoint():
     domain = request.args.get("domain")
     if not domain:
         return jsonify({"error": "No domain provided"}), 400
 
     try:
-        urls = await collect_urls(domain)
+        # Use the safe version that handles async/sync contexts
+        urls = collect_urls_safe(domain)
         return jsonify({"collected_urls": urls})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
