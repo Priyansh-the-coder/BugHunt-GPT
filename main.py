@@ -1,16 +1,32 @@
-import os
-import asyncio
 from flask import Flask, request, jsonify
-from functools import wraps
-from core.recon.subdomain_enum import enumerate_subdomains
-from core.recon.url_collector import collect_urls
-from core.recon.param_discovery import discover_all_parameters
-from core.recon.subdomain_takeover import check_takeover
-from core.utils.burp_proxy import capture_data as burp_capture
-from core.recon.port_scanner import scan_ports
-from ast import literal_eval
+from utils.burp_proxy import capture_data
+from utils.burp_repeater import init_app
+from utils.burp_intruder import intruder_engine, AttackType
+from utils.burp_sequencer import sequencer_engine
+from utils.burp_scanner import AdvancedBurpScanner
+import asyncio
+import os
+import time
+import threading
 import logging
+from concurrent.futures import ThreadPoolExecutor
+import uvloop
+import json
+from typing import Dict, Optional
+
 app = Flask(__name__)
+
+# Initialize the repeater
+init_app(app)
+
+# Thread pool for sync-to-async bridge
+executor = ThreadPoolExecutor(max_workers=10)
+client = None
+uvloop.install()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def async_to_sync(f):
     @wraps(f)
