@@ -9,6 +9,8 @@ from core.recon.port_scanner import scan_ports
 from ast import literal_eval
 import logging
 import os
+from core.recon.tech_stack import detect_tech_stack
+
 app = Flask(__name__)
 
 
@@ -40,6 +42,34 @@ def port_scan():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+# Add this route above the main block
+@app.route("/tech_stack", methods=["GET"])
+def tech_stack():
+    target = request.args.get("domain")
+    if not target:
+        return jsonify({"error": "Missing 'domain' parameter"}), 400
+    
+    try:
+        results = detect_tech_stack(target)
+        
+        if "error" in results:
+            return jsonify({
+                "domain": target,
+                "error": results["error"]
+            }), 500
+        
+        return jsonify({
+            "domain": target,
+            "final_url": results["url"],
+            "technologies": results["technologies"],
+            "categories": results["categories"],
+            "technology_count": len(results["technologies"])
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            "error": f"Unexpected error: {str(e)}"
+        }), 500
         
 @app.route("/subdomains")
 def get_subdomains():
