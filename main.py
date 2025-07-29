@@ -10,8 +10,7 @@ from ast import literal_eval
 import logging
 app = Flask(__name__)
 
-# Initialize the repeater
-init_app(app)
+
 
 # Thread pool for sync-to-async bridge
 executor = ThreadPoolExecutor(max_workers=10)
