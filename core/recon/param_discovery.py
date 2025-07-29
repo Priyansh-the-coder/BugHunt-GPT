@@ -86,14 +86,13 @@ async def run_arjun(urls: List[str]) -> List[str]:
         print(f"[!] Arjun execution failed: {e}")
         return []
 
-async def discover_all_parameters(domain: str) -> Tuple[Set[str], Dict[str, List[str]]]:
-    # Run tools concurrently
+# Keep async function name unchanged
+async def discover_all_parameters_async(domain: str) -> Tuple[Set[str], Dict[str, List[str]]]:
     paramspider_urls, arjun_urls = await asyncio.gather(
         run_paramspider(domain),
         run_arjun([])  # Empty initial run to warm up
     )
-    
-    # Second Arjun run with actual data
+
     arjun_urls = await run_arjun(paramspider_urls)
 
     all_urls = set(paramspider_urls + arjun_urls)
@@ -101,9 +100,7 @@ async def discover_all_parameters(domain: str) -> Tuple[Set[str], Dict[str, List
 
     return await extract_parameters(list(all_urls))
 
-# Sync wrapper for compatibility with existing Flask app
-def discover_all_parameters_sync(domain: str) -> Tuple[Set[str], Dict[str, List[str]]]:
-    return asyncio.run(discover_all_parameters(domain))
+# Sync wrapper for Flask
+def discover_all_parameters(domain: str) -> Tuple[Set[str], Dict[str, List[str]]]:
+    return asyncio.run(discover_all_parameters_async(domain))
 
-# Maintain original interface
-discover_all_parameters = discover_all_parameters_sync
