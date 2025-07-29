@@ -8,6 +8,7 @@ from core.utils.burp_proxy import capture_data as burp_capture
 from core.recon.port_scanner import scan_ports
 from ast import literal_eval
 import logging
+import os
 app = Flask(__name__)
 
 
