@@ -7,7 +7,7 @@ from core.recon.subdomain_takeover import check_takeover
 from core.utils.burp_proxy import capture_data as burp_capture
 from core.recon.port_scanner import scan_ports
 from ast import literal_eval
-
+import logging
 app = Flask(__name__)
 
 # Initialize the repeater
