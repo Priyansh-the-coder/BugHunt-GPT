@@ -87,7 +87,7 @@ def collect_urls_endpoint():
 
     try:
         # Use the safe version that handles async/sync contexts
-        urls = collect_urls_safe(domain)
+        urls = collect_urls(domain)
         return jsonify({"collected_urls": urls})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
