@@ -61,6 +61,13 @@ RUN wget -q https://github.com/findomain/findomain/releases/download/9.0.3/findo
     chmod +x /usr/bin/findomain && \
     rm -rf /tmp/*
 
+FROM python:3.11
+
+RUN apt-get update && \
+    apt-get install -y \
+    libxml2-dev \
+    libxslt-dev \
+    && rm -rf /var/lib/apt/lists/*
 # Set working dir and install Python deps
 WORKDIR /app
 COPY requirements.txt /app/requirements.txt
