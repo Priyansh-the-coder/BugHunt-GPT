@@ -53,7 +53,7 @@ async def run_paramspider(domain: str) -> List[str]:
     cwd="/opt/ParamSpider",
     stdout=subprocess.PIPE,
     stderr=subprocess.PIPE,
-    text=True
+    universal_newlines=True
     )
         stdout, stderr = await proc.communicate()
 
