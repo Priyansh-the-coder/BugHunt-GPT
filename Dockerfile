@@ -14,14 +14,12 @@ RUN apt-get update && apt-get install -y \
     rm go${GO_VERSION}.linux-amd64.tar.gz
 
 # Install Go tools
-RUN go install github.com/haccer/subjack@latest && \
-    go install github.com/projectdiscovery/dnsx/cmd/dnsx@latest && \
-    go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest && \
-    go install github.com/projectdiscovery/httpx/cmd/httpx@latest && \
-    go install github.com/lc/gau/v2/cmd/gau@latest && \
-    go install github.com/tomnomnom/waybackurls@latest && \
-    ln -s /root/go/bin/* /usr/bin/
-
+RUN go install github.com/haccer/subjack@latest
+RUN go install github.com/projectdiscovery/dnsx/cmd/dnsx@latest
+RUN go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
+RUN go install github.com/projectdiscovery/httpx/cmd/httpx@latest
+RUN go install github.com/lc/gau/v2/cmd/gau@latest
+RUN go install github.com/tomnomnom/waybackurls@latest
 # Subjack fingerprints
 RUN mkdir -p /usr/share/subjack && \
     curl -o /usr/share/subjack/fingerprints.json https://raw.githubusercontent.com/haccer/subjack/master/fingerprints.json
