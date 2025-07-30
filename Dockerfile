@@ -46,6 +46,16 @@ RUN wget -q https://github.com/findomain/findomain/releases/download/9.0.3/findo
     unzip -q /tmp/findomain.zip -d /tmp/ && \
     mv /tmp/findomain /usr/bin/findomain && chmod +x /usr/bin/findomain && rm -rf /tmp/*
 
+# Clone ParamSpider
+RUN git clone https://github.com/devanshbatham/ParamSpider.git /opt/ParamSpider
+
+# Patch import issue
+RUN sed -i 's/from \. import client/import client/' /opt/ParamSpider/paramspider/main.py
+
+# Ensure results folder exists
+RUN mkdir -p /opt/ParamSpider/results
+
+
 # Final app setup
 WORKDIR /app
 COPY requirements.txt /app/requirements.txt
