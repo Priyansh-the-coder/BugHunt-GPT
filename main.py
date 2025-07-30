@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from functools import wraps
 from core.recon.subdomain_enum import enumerate_subdomains
 from core.recon.url_collector import collect_urls
-from core.recon.param_discovery import discover_all_parameters_sync
+from core.recon.param_discovery import discover_all_parameters
 from core.recon.subdomain_takeover import check_takeover
 from core.utils.burp_proxy import capture_data as burp_capture
 from core.recon.port_scanner import scan_ports
@@ -127,8 +127,8 @@ def collect_urls_endpoint():
 def param_discovery():
     domain = request.args.get("domain")
     try:
-        urls = discover_all_parameters_sync(domain)
-        return jsonify({"status": "ok", "found_urls": list(urls)})
+        urls = discover_all_parameters(domain)
+        return jsonify({"status": "ok", "found_urls": (urls)})
     except Exception as e:
         return jsonify({
             "status": "error",
