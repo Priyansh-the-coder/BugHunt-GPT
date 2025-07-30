@@ -4,6 +4,7 @@ from urllib.parse import urlparse, parse_qs
 from concurrent.futures import ThreadPoolExecutor
 from typing import Set, Dict, List, Tuple
 import glob
+import subprocess
 # ---------------- Core Functions ----------------
 
 def _process_single_url(url: str) -> Tuple[Set[str], str]:
