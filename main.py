@@ -128,7 +128,7 @@ def param_discovery():
     domain = request.args.get("domain")
     try:
         urls = discover_all_parameters_sync(domain)
-        return jsonify({"status": "ok", "found_urls": urls})
+        return jsonify({"status": "ok", "found_urls": list(urls)})
     except Exception as e:
         return jsonify({
             "status": "error",
