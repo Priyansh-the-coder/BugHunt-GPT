@@ -17,7 +17,7 @@ def extract_parameters(urls):
                 param_map[param] = []
             param_map[param].append(url)
 
-    return param_names, param_map
+    return list(param_names), param_map
 
 def run_paramspider(domain):
     print(f"[+] Running ParamSpider on: {domain}")
