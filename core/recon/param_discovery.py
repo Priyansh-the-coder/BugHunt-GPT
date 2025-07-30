@@ -33,7 +33,7 @@ async def run_paramspider(domain: str) -> List[str]:
     print(f"[+] Running ParamSpider on: {domain}")
 
     paramspider_dir = "/opt/ParamSpider"
-    main_script = os.path.join(paramspider_dir, "paramspider", "main.py")
+    main_script = os.path.join(paramspider_dir,"main.py")
     print("[DEBUG] Files found in /opt/ParamSpider/paramspider:")
     print(glob.glob("/opt/ParamSpider/paramspider/*"))
     if not os.path.exists(main_script):
