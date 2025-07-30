@@ -31,6 +31,8 @@ async def extract_parameters(urls: List[str]) -> Tuple[Set[str], Dict[str, List[
     return param_names, param_map
 
 async def run_paramspider(domain: str) -> List[str]:
+    env = os.environ.copy()
+    env["PYTHONPATH"] = "/opt/ParamSpider"
     paramspider_dir = "/opt/ParamSpider/paramspider"
     main_script = os.path.join(paramspider_dir, "main.py")
 
@@ -39,10 +41,12 @@ async def run_paramspider(domain: str) -> List[str]:
 
     try:
         proc = await asyncio.create_subprocess_exec(
-            "python3", main_script, "-d", domain,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
+    "python3", "-m", "paramspider.main", "-d", domain,
+    cwd="/opt/ParamSpider",
+    stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE,
+    env=env
+)
         stdout_bytes, stderr_bytes = await proc.communicate()
 
         stdout = stdout_bytes.decode("utf-8", errors="ignore")
