@@ -35,8 +35,8 @@ RUN git clone --depth=1 https://github.com/devanshbatham/ParamSpider.git /opt/Pa
     mkdir -p /opt/ParamSpider/results && \
     sed -i '/result_file =/d' /opt/ParamSpider/paramspider/main.py && \
     sed -i '/^def fetch_and_clean_urls/a \
-    \ \ \ \ domain_clean = domain.replace("https://", "").replace("http://", "").replace("/", "_").replace(":", "_")\n\
-    \ \ \ \ result_file = f"results/{domain_clean}.txt"' /opt/ParamSpider/paramspider/main.py
+    domain_clean = domain.replace('https://', '').replace('http://', '').replace('/', '_').replace(':', '_')\\
+    result_file = f'results/{domain_clean}.txt'" /opt/ParamSpider/paramspider/main.py
 
 
 # Install Arjun
