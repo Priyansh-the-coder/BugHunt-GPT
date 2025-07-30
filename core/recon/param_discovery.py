@@ -34,8 +34,17 @@ async def run_paramspider(domain: str) -> List[str]:
 
     paramspider_dir = "/opt/ParamSpider"
     main_script = os.path.join(paramspider_dir,"main.py")
-    print("[DEBUG] Files found in /opt/ParamSpider/paramspider:")
-    print(glob.glob("/opt/ParamSpider/paramspider/*"))
+     # Diagnostic: print entire tree of /opt/ParamSpider
+    debug_tree = []
+    for root, dirs, files in os.walk(paramspider_dir):
+        for name in files:
+            debug_tree.append(os.path.join(root, name))
+
+    raise FileNotFoundError(
+        f"[!] ParamSpider main script not found.\n"
+        f"[i] Scanned path: {paramspider_dir}\n"
+        f"[i] Files found:\n" + "\n".join(debug_tree)
+    )
     if not os.path.exists(main_script):
         raise FileNotFoundError(f"[!] ParamSpider script not found at: {main_script}")
 
