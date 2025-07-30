@@ -53,6 +53,8 @@ RUN sed -i 's/^from \. import client$/from paramspider import client/' /opt/Para
 # Ensure results folder exists
 RUN mkdir -p /opt/ParamSpider/results
 
+# Fix bad filename with colon/slashes in result file
+RUN sed -i "s|result_file = f\"results/{domain}.txt\"|result_file = f'results/{domain.replace(\"https://\", \"\").replace(\"http://\", \"\").replace(\"/\", \"_\").replace(\":\", \"_\")}.txt'|" /opt/ParamSpider/paramspider/main.py
 
 # Final app setup
 WORKDIR /app
