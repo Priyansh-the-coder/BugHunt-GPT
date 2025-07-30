@@ -29,13 +29,14 @@ RUN mkdir -p /usr/share/subjack && \
 RUN git clone --depth=1 https://github.com/incogbyte/shosubgo.git /opt/shosubgo && \
     cd /opt/shosubgo && go build -o shosubgo main.go && mv shosubgo /usr/bin/ && rm -rf /opt/shosubgo
 
-# Clone and patch ParamSpider
 RUN git clone --depth=1 https://github.com/devanshbatham/ParamSpider.git /opt/ParamSpider && \
     pip install --no-cache-dir requests urllib3 && \
     chmod +x /opt/ParamSpider/paramspider/main.py && \
     mkdir -p /opt/ParamSpider/results && \
     sed -i '/result_file =/d' /opt/ParamSpider/paramspider/main.py && \
-    sed -i '/# Clean and extract URLs/i\    domain_clean = domain.replace("https://", "").replace("http://", "").replace("/", "_").replace(":", "_")\n    result_file = f"results/{domain_clean}.txt"' /opt/ParamSpider/paramspider/main.py
+    sed -i '/^def fetch_and_clean_urls/a \
+    \ \ \ \ domain_clean = domain.replace("https://", "").replace("http://", "").replace("/", "_").replace(":", "_")\n\
+    \ \ \ \ result_file = f"results/{domain_clean}.txt"' /opt/ParamSpider/paramspider/main.py
 
 
 # Install Arjun
