@@ -48,15 +48,14 @@ async def run_paramspider(domain: str) -> List[str]:
     env = {**os.environ}
 
     try:
-        proc = await asyncio.create_subprocess_exec(
-    ["python3", "-m", "paramspider", "-d", domain],
-    cwd="/opt/ParamSpider",
-    stdout=subprocess.PIPE,
-    stderr=subprocess.PIPE,
-    universal_newlines=True
+            proc = await asyncio.create_subprocess_exec(
+        "python3", "main.py", "-d", domain,
+        cwd="/opt/ParamSpider/paramspider",
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
     )
-        stdout, stderr = await proc.communicate()
 
+        stdout, stderr = await proc.communicate()
         stdout_decoded = stdout.decode().strip()
         stderr_decoded = stderr.decode().strip()
 
