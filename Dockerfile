@@ -29,10 +29,14 @@ RUN mkdir -p /usr/share/subjack && \
 RUN git clone --depth=1 https://github.com/incogbyte/shosubgo.git /opt/shosubgo && \
     cd /opt/shosubgo && go build -o shosubgo main.go && mv shosubgo /usr/bin/ && rm -rf /opt/shosubgo
 
-# Install ParamSpider
+# Clone and patch ParamSpider
 RUN git clone --depth=1 https://github.com/devanshbatham/ParamSpider.git /opt/ParamSpider && \
     pip install --no-cache-dir requests urllib3 && \
-    chmod +x /opt/ParamSpider/paramspider/main.py
+    chmod +x /opt/ParamSpider/paramspider/main.py && \
+    mkdir -p /opt/ParamSpider/results && \
+    sed -i '/result_file =/d' /opt/ParamSpider/paramspider/main.py && \
+    sed -i '/# Clean and extract URLs/i\    domain_clean = domain.replace("https://", "").replace("http://", "").replace("/", "_").replace(":", "_")\n    result_file = f"results/{domain_clean}.txt"' /opt/ParamSpider/paramspider/main.py
+
 
 # Install Arjun
 # RUN git clone --depth=1 https://github.com/s0md3v/Arjun.git /opt/Arjun && \
@@ -49,13 +53,6 @@ RUN wget -q https://github.com/findomain/findomain/releases/download/9.0.3/findo
 
 # Patch import issue
 RUN sed -i 's/^from \. import client$/from paramspider import client/' /opt/ParamSpider/paramspider/main.py
-
-# Ensure results folder exists
-RUN mkdir -p /opt/ParamSpider/results
-
-# Safely patch the result_file line in main.py to sanitize domain name
-RUN sed -i "/result_file = f/d" /opt/ParamSpider/paramspider/main.py && \
-    sed -i "/# Clean and extract URLs/i\    domain_clean = domain.replace(\"https://\", \"\").replace(\"http://\", \"\").replace(\"/\", \"_\").replace(\":\", \"_\")\n    result_file = f\"results/{domain_clean}.txt\"" /opt/ParamSpider/paramspider/main.py
 
 # Final app setup
 WORKDIR /app
