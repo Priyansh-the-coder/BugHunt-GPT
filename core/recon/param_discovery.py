@@ -32,7 +32,7 @@ async def extract_parameters(urls: List[str]) -> Tuple[Set[str], Dict[str, List[
 async def run_paramspider(domain: str) -> List[str]:
     print(f"[+] Running ParamSpider on: {domain}")
 
-    paramspider_dir = "/opt/ParamSpider"
+    paramspider_dir = "/opt/ParamSpider/paramspider"
     main_script = os.path.join(paramspider_dir,"main.py")
      # Diagnostic: print entire tree of /opt/ParamSpider
     debug_tree = []
@@ -40,11 +40,7 @@ async def run_paramspider(domain: str) -> List[str]:
         for name in files:
             debug_tree.append(os.path.join(root, name))
 
-    raise FileNotFoundError(
-        f"[!] ParamSpider main script not found.\n"
-        f"[i] Scanned path: {paramspider_dir}\n"
-        f"[i] Files found:\n" + "\n".join(debug_tree)
-    )
+
     if not os.path.exists(main_script):
         raise FileNotFoundError(f"[!] ParamSpider script not found at: {main_script}")
 
