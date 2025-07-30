@@ -48,12 +48,12 @@ async def run_paramspider(domain: str) -> List[str]:
 
     try:
         proc = await asyncio.create_subprocess_exec(
-            "python3",main_script, "-d", domain,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            cwd=paramspider_dir,
-            env=env
-        )
+    ["python3", "-m", "paramspider", "-d", domain],
+    cwd="/opt/ParamSpider",
+    stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE,
+    text=True
+    )
         stdout, stderr = await proc.communicate()
 
         stdout_decoded = stdout.decode().strip()
