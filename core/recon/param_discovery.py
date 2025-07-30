@@ -31,47 +31,39 @@ async def extract_parameters(urls: List[str]) -> Tuple[Set[str], Dict[str, List[
     return param_names, param_map
 
 async def run_paramspider(domain: str) -> List[str]:
-    print(f"[+] Running ParamSpider on: {domain}")
-
     paramspider_dir = "/opt/ParamSpider/paramspider"
-    main_script = os.path.join(paramspider_dir,"main.py")
-     # Diagnostic: print entire tree of /opt/ParamSpider
-    debug_tree = []
-    for root, dirs, files in os.walk(paramspider_dir):
-        for name in files:
-            debug_tree.append(os.path.join(root, name))
-
+    main_script = os.path.join(paramspider_dir, "main.py")
 
     if not os.path.exists(main_script):
         raise FileNotFoundError(f"[!] ParamSpider script not found at: {main_script}")
 
-    env = {**os.environ}
-
     try:
-            proc = await asyncio.create_subprocess_exec(
-        "python3", "main.py", "-d", domain,
-        cwd="/opt/ParamSpider/paramspider",
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
-    )
+        proc = await asyncio.create_subprocess_exec(
+            "python3", main_script, "-d", domain,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        stdout_bytes, stderr_bytes = await proc.communicate()
 
-        stdout, stderr = await proc.communicate()
-        stdout_decoded = stdout.decode().strip()
-        stderr_decoded = stderr.decode().strip()
+        stdout = stdout_bytes.decode("utf-8", errors="ignore")
+        stderr = stderr_bytes.decode("utf-8", errors="ignore")
 
+        # 🧪 Send both stdout and stderr back to API caller if error occurs
         if proc.returncode != 0:
-            raise RuntimeError(f"[!] ParamSpider failed (code {proc.returncode}): {stderr_decoded}")
+            raise RuntimeError(
+                f"[!] ParamSpider failed (code {proc.returncode})\n[STDOUT]\n{stdout}\n[STDERR]\n{stderr}"
+            )
 
         urls = set()
-        for line in stdout_decoded.splitlines():
+        for line in stdout.splitlines():
             if "?" in (url := line.strip()):
                 urls.add(url)
 
-        print(f"[✓] ParamSpider found {len(urls)} URLs with parameters.")
         return list(urls)
 
     except Exception as e:
-        raise RuntimeError(f"[!] ParamSpider exception: {e}")
+        raise RuntimeError(f"[!] ParamSpider exception: {str(e)}")
+
 
 
 # ---------------- Sync Wrapper ----------------
