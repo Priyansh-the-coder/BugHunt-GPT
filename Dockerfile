@@ -3,6 +3,7 @@ FROM python:3.11-slim
 ENV DEBIAN_FRONTEND=noninteractive
 ENV GO_VERSION=1.23.11
 ENV PATH="/usr/local/go/bin:/root/go/bin:$PATH"
+ENV PYTHONPATH=/opt/ParamSpider
 
 # Install system deps and Go
 RUN apt-get update && apt-get install -y \
