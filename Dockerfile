@@ -48,7 +48,7 @@ RUN wget -q https://github.com/findomain/findomain/releases/download/9.0.3/findo
 
 
 # Patch import issue
-RUN sed -i 's/from \. import client/import client/' /opt/ParamSpider/paramspider/main.py
+RUN sed -i 's/^from \. import client$/from paramspider import client/' /opt/ParamSpider/paramspider/main.py
 
 # Ensure results folder exists
 RUN mkdir -p /opt/ParamSpider/results
