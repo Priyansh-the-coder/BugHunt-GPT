@@ -78,8 +78,12 @@ def get_subdomains():
         return "No domain provided", 400
 
     try:
-        results = enumerate_subdomains(domain)
-        return str(results), 200
+        result = enumerate_subdomains(domain)
+        
+        return jsonify({
+            "data": result,
+            "domain": domain
+        })
     except Exception as e:
         return str(e), 500
 
