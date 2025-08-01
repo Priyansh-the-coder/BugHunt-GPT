@@ -1,15 +1,10 @@
 import asyncio
-import os
-from typing import List, Set
-from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor
 import shutil
+from typing import List, Set
 
-ALL_SUBS_FILE = "all_subs.txt"
-SUBS_FILE = "subs.txt"
 
-async def run_tool(command: List[str], output_file: str = None) -> List[str]:
-    """Run a subdomain enumeration tool asynchronously"""
+async def run_tool(command: List[str]) -> List[str]:
+    """Run a subdomain enumeration tool asynchronously and return results"""
     try:
         if shutil.which(command[0]) is None:
             return [f"[!] Tool not found: {command[0]}"]
@@ -23,89 +18,78 @@ async def run_tool(command: List[str], output_file: str = None) -> List[str]:
         
         if proc.returncode != 0:
             return [f"[!] Failed: {' '.join(command)} - {stderr.decode().strip()}"]
-            
-        results = stdout.decode().strip().split("\n")
         
-        if output_file:
-            async with aiofiles.open(output_file, "a") as f:
-                await f.write("\n".join(r for r in results if r) + "\n")
-                
-        return results
-        
+        return [
+            line.strip() for line in stdout.decode().split("\n")
+            if line.strip()
+        ]
+
     except Exception as e:
         return [f"[!] Error: {e}"]
 
 
-async def run_tools_concurrently(domain: str) -> None:
-    """Run all subdomain tools in parallel"""
+async def run_tools_concurrently(domain: str) -> Set[str]:
+    """Run subdomain tools in parallel and collect results in memory"""
     tools = [
-        (["subfinder", "-d", domain, "-silent"], ALL_SUBS_FILE),
-        (["cero", domain], ALL_SUBS_FILE),
-        (["shosubgo", "-d", domain], ALL_SUBS_FILE),
+        ["subfinder", "-d", domain, "-silent"],
+        ["cero", domain],
+        ["shosubgo", "-d", domain],
     ]
-    
-    # Clear previous results
-    open(ALL_SUBS_FILE, 'w').close()
-    
-    print(f"[+] Enumerating subdomains for: {domain}")
-    
-    # Run all tools concurrently
-    await asyncio.gather(*[
-        run_tool(cmd, out) for cmd, out in tools
-    ])
 
-async def filter_live_subdomains() -> List[str]:
-    """Check which subdomains are live using httpx"""
+    print(f"[+] Enumerating subdomains for: {domain}")
+
+    all_results = await asyncio.gather(*[run_tool(cmd) for cmd in tools])
+    
+    # Flatten and deduplicate
+    subs = set()
+    for result in all_results:
+        for sub in result:
+            if not sub.startswith("[!]"):  # Filter error lines
+                subs.add(sub)
+    
+    return subs
+
+
+async def filter_live_subdomains(subdomains: Set[str]) -> List[str]:
+    """Filter live subdomains using httpx, all in memory"""
     try:
-        # Deduplicate results
-        async with aiofiles.open(ALL_SUBS_FILE, "r") as f:
-            content = await f.read()
-            unique_subs = sorted(set(
-                line.strip() for line in content.split("\n") 
-                if line.strip()
-            ))
-            
-        # Save unique subdomains
-        async with aiofiles.open(SUBS_FILE, "w") as f:
-            await f.write("\n".join(unique_subs))
-            
-        # Check live subdomains
+        if not subdomains:
+            return []
+
+        # Pass subdomains to httpx via stdin
         proc = await asyncio.create_subprocess_exec(
-            "httpx", "-l", SUBS_FILE, "-silent", "-status-code", "-follow-redirects",
+            "httpx", "-silent", "-status-code", "-follow-redirects",
+            stdin=asyncio.subprocess.PIPE,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
-        stdout, stderr = await proc.communicate()
-        
+
+        input_data = "\n".join(subdomains).encode()
+        stdout, stderr = await proc.communicate(input=input_data)
+
         if proc.returncode != 0:
-            print(f"[!] httpx error: {stderr.decode().strip()}")
-            return []
-            
+            return [f"[!] httpx error: {stderr.decode().strip()}"]
+
+        # Parse live subdomains
         live_subs = [
-            line.strip().split()[0] 
-            for line in stdout.decode().split("\n") 
+            line.strip().split()[0]
+            for line in stdout.decode().split("\n")
             if line.startswith("http")
         ]
-        
+
         print(f"[✓] Found {len(live_subs)} live subdomains.")
         return live_subs
-        
+
     except Exception as e:
-        print(f"[!] Error filtering live subdomains: {e}")
-        return []
+        return [f"[!] Error filtering live subdomains: {e}"]
+
 
 async def enumerate_subdomains_async(domain: str) -> List[str]:
     """Async implementation of subdomain enumeration"""
-    await run_tools_concurrently(domain)
-    return await filter_live_subdomains()
+    found_subs = await run_tools_concurrently(domain)
+    return await filter_live_subdomains(found_subs)
 
-# Sync wrapper for Flask compatibility
+
+# Sync wrapper for Flask or synchronous use
 def enumerate_subdomains(domain: str) -> List[str]:
-    """Original sync interface (no changes needed in main.py)"""
-    try:
-        import aiofiles  # Optional for async file I/O
-    except ImportError:
-        aiofiles = None
-        print("[!] For optimal performance, install aiofiles: pip install aiofiles")
-        
     return asyncio.run(enumerate_subdomains_async(domain))
