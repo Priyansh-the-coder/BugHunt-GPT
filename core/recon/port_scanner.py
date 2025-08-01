@@ -10,7 +10,7 @@ def scan_ports(domain):
     try:
         # Run nmap and capture output directly to memory
         result = subprocess.run([
-            "nmap", domain, "-sS", "-sV", "-T4", "-Pn", "-oG", "-"
+            "nmap","-T4", "-A", "-v",  domain
         ], capture_output=True, text=True)
         
         if result.returncode != 0:
