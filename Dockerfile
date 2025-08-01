@@ -25,6 +25,11 @@ RUN go install github.com/tomnomnom/waybackurls@latest
 RUN mkdir -p /usr/share/subjack && \
     curl -o /usr/share/subjack/fingerprints.json https://raw.githubusercontent.com/haccer/subjack/master/fingerprints.json
 
+# Install Nmap (for port scanning)
+RUN apt-get update && \
+    apt-get install -y nmap && \
+    rm -rf /var/lib/apt/lists/*
+    
 # Install shosubgo
 RUN git clone --depth=1 https://github.com/incogbyte/shosubgo.git /opt/shosubgo && \
     cd /opt/shosubgo && go build -o shosubgo main.go && mv shosubgo /usr/bin/ && rm -rf /opt/shosubgo
