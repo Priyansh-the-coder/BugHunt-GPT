@@ -3,6 +3,7 @@ import os
 from typing import List, Set
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
+import shutil
 
 ALL_SUBS_FILE = "all_subs.txt"
 SUBS_FILE = "subs.txt"
@@ -10,6 +11,9 @@ SUBS_FILE = "subs.txt"
 async def run_tool(command: List[str], output_file: str = None) -> List[str]:
     """Run a subdomain enumeration tool asynchronously"""
     try:
+        if shutil.which(command[0]) is None:
+            return [f"[!] Tool not found: {command[0]}"]
+        
         proc = await asyncio.create_subprocess_exec(
             *command,
             stdout=asyncio.subprocess.PIPE,
@@ -18,8 +22,7 @@ async def run_tool(command: List[str], output_file: str = None) -> List[str]:
         stdout, stderr = await proc.communicate()
         
         if proc.returncode != 0:
-            print(f"[!] {' '.join(command)} failed: {stderr.decode().strip()}")
-            return []
+            return [f"[!] Failed: {' '.join(command)} - {stderr.decode().strip()}"]
             
         results = stdout.decode().strip().split("\n")
         
@@ -30,8 +33,8 @@ async def run_tool(command: List[str], output_file: str = None) -> List[str]:
         return results
         
     except Exception as e:
-        print(f"[!] Error running {' '.join(command)}: {e}")
-        return []
+        return [f"[!] Error: {e}"]
+
 
 async def run_tools_concurrently(domain: str) -> None:
     """Run all subdomain tools in parallel"""
